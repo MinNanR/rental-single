@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>rental-single</artifactId>
+        <groupId>site.minnan</groupId>
+        <version>1.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>rental-application</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>site.minnan</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0</version>
+            <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ognl</groupId>
+            <artifactId>ognl</artifactId>
+            <version>3.2.10</version>
+        </dependency>
+
+        <!--itext-->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>html2pdf</artifactId>
+            <version>2.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>font-asian</artifactId>
+            <version>7.1.2</version>
+        </dependency>
+
+        <!--pdfbox-->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>fontbox</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>jempbox</artifactId>
+            <version>1.8.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>xmpbox</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>preflight</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox-tools</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <!--阿里云sdk-->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.10.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.belerweb</groupId>
+            <artifactId>pinyin4j</artifactId>
+            <version>2.5.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>site.minnan</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+        <!--        <resources>-->
+        <!--            <resource>-->
+        <!--                <directory>src/main/resources</directory>-->
+        <!--                <filtering>true</filtering>-->
+        <!--                <excludes>-->
+        <!--                    <exclude>application.yml</exclude>-->
+        <!--                    <exclude>application-dev.yml</exclude>-->
+        <!--                </excludes>-->
+        <!--            </resource>-->
+        <!--            <resource>-->
+        <!--                <directory>src/main/resources</directory>-->
+        <!--                <filtering>true</filtering>-->
+        <!--                <includes>-->
+        <!--                    <include>application.yml</include>-->
+        <!--                    <include>application-${env}.yml</include>-->
+        <!--                </includes>-->
+        <!--            </resource>-->
+        <!--        </resources>-->
+    </build>
+</project>

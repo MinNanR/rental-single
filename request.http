@@ -1,0 +1,557 @@
+POST {{authUrl}}/auth/login/password
+Content-Type: application/json
+
+{
+  "username": "min",
+  "password": "c663b11dff4be0badcf652212a2c1102"
+}
+
+
+> {% client.global.set("admin_token", "Bearer " + response.body.data.token); %}
+
+###
+POST {{authUrl}}/auth/login/password
+Content-Type: application/json
+
+{
+  "username": "18925503712",
+  "password": "e10adc3949ba59abbe56e057f20f883e"
+}
+
+> {% client.global.set("landlord_token", `Bearer ${response.body.data.token}`); %}
+
+###
+POST {{authUrl}}/auth/login/password
+Content-Type: application/json
+
+{
+  "username": "13813812138",
+  "password": "e10adc3949ba59abbe56e057f20f883e"
+}
+
+> {% client.global.set("tenant_token", `Bearer ${response.body.data.token}`) %}
+
+###
+POST {{userUrl}}/user/getUserList
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "pageIndex": 1,
+  "pageSize": 10
+}
+
+###
+POST {{userUrl}}/user/addUser/landlord
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "username": "18925503712",
+  "password": "d31b530952bdc79c84303e5a9705651c",
+  "realName": "强"
+}
+
+###
+POST {{userUrl}}/user/updateUser
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 12,
+  "realName": "王五",
+  "phone": "17328483960"
+}
+
+###
+POST {{userUrl}}/user/disableUser
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 6
+}
+
+###
+POST {{userUrl}}/user/enableUser
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 6
+}
+
+###
+POST {{houseUrl}}/house/addHouse
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "address": "永和街1号",
+  "directorName": "李四",
+  "directorPhone": "17238390012"
+}
+
+###
+POST http://localhost:2000/house/getHouseList
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "pageSize": 10,
+  "pageIndex": 1
+}
+
+###
+POST {{configUrl}}/common/addMenu
+Content-Type:application/json
+Authorization: {{admin_token}}
+
+{
+  "name": "日志",
+  "url": "/logs",
+  "icon": "glyphicon glyphicon-file",
+  "role": "ADMIN"
+}
+
+###
+POST http://localhost:2000/common/getMenu
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{}
+
+###
+POST http://localhost:2000/house/getHouseInfo
+Content-Type: application/json
+Authorization: {{landlord_token}}
+
+{
+  "id": 6
+}
+
+###
+POST {{houseUrl}}/house/updateHouse
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 6,
+  "directorName": "路人甲",
+  "directorPhone": "13813812133"
+}
+
+###
+POST {{configUrl}}/common/getUserInformation
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{}
+
+###
+POST {{tenantUrl}}/tenant/addTenant
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "name": "赵六",
+  "gender": "MALE",
+  "phone": "18933334444",
+  "identificationNumber": "441933198202021125",
+  "birthday": "1982-02-02",
+  "hometownProvince": "广东",
+  "hometownCity": "东莞",
+  "houseId": "2",
+  "houseName": "三甲1号",
+  "roomId": 8,
+  "roomNumber": "101"
+}
+
+###
+POST {{tenantUrl}}/tenant/getTenantList
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "pageIndex": 1,
+  "pageSize": 10
+}
+
+###
+POST {{tenantUrl}}/tenant/getTenantInfo
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 12
+}
+
+###
+POST {{roomUrl}}/room/addRoom
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "houseId": 1,
+  "houseName": "永泰街",
+  "roomNumber": "405",
+  "floor": 4
+}
+
+###
+POST {{roomUrl}}/room/getRoomList
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "pageSize": 10,
+  "pageIndex": 1,
+  "houseId": 1
+}
+
+###
+POST {{roomUrl}}/room/getRoomInfo
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 2
+}
+
+###
+POST {{roomUrl}}/room/updateRoom
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 2,
+  "roomNumber": "101"
+}
+
+###
+POST {{roomUrl}}/room/checkRoomNumberUsed
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 2,
+  "roomNumber": "111",
+  "houseId": 1
+}
+
+###
+POST {{houseUrl}}/house/getHouseDropDown
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{}
+
+###
+POST {{roomUrl}}/room/getRoomStatusDropDown
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{}
+
+
+###
+POST {{roomUrl}}/room/getRoomDropDown
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "houseId": 1
+}
+
+###
+POST {{tenantUrl}}/tenant/tenantMove
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "roomId": 7,
+  "houseId": 1,
+  "houseName": "永泰街",
+  "roomNumber": "103",
+  "tenantIdList": [
+    21,
+    20
+  ]
+}
+
+###
+POST  {{tenantUrl}}/tenant/updateTenant
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 20,
+  "hometownProvince": "广东省",
+  "hometownCity": "东莞市",
+  "birthday": "1998-03-05",
+  "gender": "FEMALE"
+}
+
+###
+POST {{tenantUrl}}/tenant/getTenantInfo
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 20
+}
+
+###
+POST {{tenantUrl}}/tenant/surrender
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 20
+}
+
+###
+POST {{configUrl}}/common/getRoleDropDown
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{}
+
+###
+POST {{userUrl}}/user/getUserInfo
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 1
+}
+
+###
+POST {{billUrl}}/utility/getUtilityList
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "pageIndex": 1,
+  "pageSize": 10,
+  "houseId": 1,
+  "year": 2020
+}
+
+###
+POST {{roomUrl}}/room/getFloorDropDown
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "houseId": 1
+}
+
+
+###
+POST {{billUrl}}/bill/setUtilityPrice
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "waterPrice": 1,
+  "electricityPrice": 4,
+  "accessCardPrice": {
+    "永泰街": 25,
+    "三甲1号": 20
+  }
+
+}
+
+###
+POST {{billUrl}}/bill/getUtilityPrice
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{}
+
+###
+POST {{billUrl}}/bill/getUnrecordedBill
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "houseId": 1,
+  "floor": 1,
+  "year": 2021,
+  "month": 1
+}
+
+###
+POST {{billUrl}}/bill/getBillList
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "pageSize": 10,
+  "pageIndex": 1,
+  "type": "UNPAID"
+}
+
+###
+POST {{billUrl}}/bill/getBillList/unpaid
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "pageSize": 10,
+  "pageIndex": 1
+}
+
+###
+POST {{billUrl}}/bill/getBillList/paid
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "pageSize": 10,
+  "pageIndex": 1
+}
+
+###
+POST http://localhost:2000/rental/bill/getBillInfo
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 115
+}
+
+###
+POST {{roomUrl}}/room/getAllRoom
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 1
+}
+
+###
+POST {{utilityUrl}}/utility/recordUtility/batch
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+[
+  {
+    "roomId": 8,
+    "roomNumber": 101,
+    "houseId": 2,
+    "houseName": "三甲1号",
+    "water": 10,
+    "electricity": 3
+  }
+]
+
+###
+POST {{utilityUrl}}/utility/updateUtility
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 7,
+  "water": 20
+}
+
+###
+POST {{utilityUrl}}/utility/getUtilityList
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "pageIndex": 1,
+  "pageSize": 10,
+  "roomId": 10
+}
+
+###
+POST {{tenantUrl}}/tenant/getTenantList/app
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{}
+
+
+###
+POST {{utilityUrl}}/utility/getRecordList
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "pageSize": 10,
+  "pageIndex": 1
+}
+
+###
+POST {{utilityUrl}}/utility/recordUtility/single
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "roomId": 10,
+  "roomNumber": 201,
+  "houseId": 1,
+  "houseName": "永泰街",
+  "water": 14,
+  "electricity": 23
+}
+
+###
+POST {{roomUrl}}/room/getFloorDropDown
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{}
+
+###
+POST {{roomUrl}}/room/getRoomByFloor
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "houseId": 1,
+  "floor": 2
+}
+
+###
+POST {{billUrl}}/bill/getBillList
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "pageSize": 10,
+  "pageIndex": 1
+}
+
+###
+POST {{billUrl}}/bill/createReceipt
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "id": 114
+}
+
+###
+POST {{billUrl}}/bill/getRoomBillList
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "pageIndex": 1,
+  "pageSize": 15,
+  "roomId": 7
+}
+
+###
+POST {{tenantUrl}}/tenant/surrenderAll
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "idList": [21]
+}
