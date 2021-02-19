@@ -8,8 +8,12 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.text.csv.CsvUtil;
 import cn.hutool.core.text.csv.CsvWriter;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aliyun.oss.OSS;
+import com.aliyun.oss.model.OSSObject;
+import com.aliyun.oss.model.OSSObjectSummary;
+import com.aliyun.oss.model.ObjectListing;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -27,6 +31,7 @@ import site.minnan.rental.domain.entity.UtilityRecord;
 import site.minnan.rental.domain.mapper.UtilityMapper;
 import site.minnan.rental.domain.mapper.UtilityRecordMapper;
 import site.minnan.rental.domain.vo.ListQueryVO;
+import site.minnan.rental.domain.vo.UtilityFileVO;
 import site.minnan.rental.domain.vo.UtilityRecordVO;
 import site.minnan.rental.domain.vo.UtilityVO;
 import site.minnan.rental.infrastructure.enumerate.UtilityStatus;
@@ -40,7 +45,6 @@ import site.minnan.rental.userinterface.dto.UpdateUtilityDTO;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.*;
@@ -67,6 +71,9 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Value("${aliyun.utilityFolder}")
     private String folder;
+
+    @Value("${aliyun.baseUrl}")
+    private String baseUrl;
 
     @Override
     @Transactional
@@ -199,7 +206,7 @@ public class UtilityServiceImpl implements UtilityService {
         QueryWrapper<Utility> queryWrapper = new QueryWrapper<>();
         DateTime lastMonth = DateTime.now().offset(DateField.MONTH, -1);
         queryWrapper.eq("year", lastMonth.year())
-                .eq("month", lastMonth.month())
+                .eq("month", lastMonth.month() + 1)
                 .orderByAsc("update_time");
         List<Utility> utilityList = utilityMapper.selectList(queryWrapper);
         Map<String, List<Utility>> groupByHouseName = utilityList.stream()
@@ -210,7 +217,7 @@ public class UtilityServiceImpl implements UtilityService {
             try {
                 saveToCsv(key, time, value);
             } catch (IOException e) {
-                log.error("备份水电记录失败，房屋：{}，时间：{}",key, time);
+                log.error("备份水电记录失败，房屋：{}，时间：{}", key, time);
             }
         });
     }
@@ -224,7 +231,7 @@ public class UtilityServiceImpl implements UtilityService {
      */
     public void saveToCsv(String houseName, String time, List<Utility> data) throws IOException {
         File temp = File.createTempFile("temp", "csv");
-        CsvWriter writer = CsvUtil.getWriter(temp, StandardCharsets.UTF_8);
+        CsvWriter writer = CsvUtil.getWriter(temp, CharsetUtil.CHARSET_GBK);
         writer.write(new String[]{"房号", "时间", "水表行度", "电表行度"});
         for (Utility utility : data) {
             writer.write(new String[]{utility.getRoomNumber(),
@@ -238,6 +245,21 @@ public class UtilityServiceImpl implements UtilityService {
         BufferedInputStream is = FileUtil.getInputStream(temp);
         String ossKey = StrUtil.format("{}/{}{}水电记录.csv", folder, houseName, time);
         oss.putObject(bucketName, ossKey, is);
+        log.info("备份{}完成" + StrUtil.format("{}{}水电记录", houseName, time));
     }
 
+    /**
+     * 获取水电记录的备份记录
+     *
+     * @return
+     */
+    @Override
+    public List<UtilityFileVO> getUtilityFileList() {
+        ObjectListing objectListing = oss.listObjects(bucketName, folder);
+        List<OSSObjectSummary> objects = objectListing.getObjectSummaries();
+        return objects.stream()
+                .map(e -> new UtilityFileVO(StrUtil.subBetween(e.getKey(), folder + "/", ".csv"),
+                        StrUtil.format("{}/{}", baseUrl, e.getKey())))
+                .collect(Collectors.toList());
+    }
 }

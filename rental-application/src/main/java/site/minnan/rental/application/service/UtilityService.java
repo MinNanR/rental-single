@@ -1,6 +1,7 @@
 package site.minnan.rental.application.service;
 
 import site.minnan.rental.domain.vo.ListQueryVO;
+import site.minnan.rental.domain.vo.UtilityFileVO;
 import site.minnan.rental.domain.vo.UtilityRecordVO;
 import site.minnan.rental.domain.vo.UtilityVO;
 import site.minnan.rental.userinterface.dto.AddUtilityDTO;
@@ -52,4 +53,10 @@ public interface UtilityService {
      * 备份水电记录（每月定时任务）
      */
     void backUpUtility();
+
+    /**
+     * 获取水电记录的备份记录
+     * @return
+     */
+    List<UtilityFileVO> getUtilityFileList();
 }

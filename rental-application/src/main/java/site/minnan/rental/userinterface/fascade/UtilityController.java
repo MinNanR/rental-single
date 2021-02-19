@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.minnan.rental.application.service.UtilityService;
 import site.minnan.rental.domain.vo.ListQueryVO;
+import site.minnan.rental.domain.vo.UtilityFileVO;
 import site.minnan.rental.domain.vo.UtilityRecordVO;
 import site.minnan.rental.domain.vo.UtilityVO;
 import site.minnan.rental.userinterface.dto.AddUtilityDTO;
@@ -63,6 +64,13 @@ public class UtilityController {
     @PostMapping("getRecordList")
     public ResponseEntity<ListQueryVO<UtilityRecordVO>> getRecordList(@RequestBody @Valid GetRecordListDTO dto) {
         ListQueryVO<UtilityRecordVO> vo = utilityService.getRecordList(dto);
+        return ResponseEntity.success(vo);
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PostMapping("getRecordFile")
+    public ResponseEntity<List<UtilityFileVO>> getUtilityFileList(){
+        List<UtilityFileVO> vo = utilityService.getUtilityFileList();
         return ResponseEntity.success(vo);
     }
 }

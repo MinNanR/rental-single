@@ -167,7 +167,7 @@ public class RooServiceImpl implements RoomService {
                 .ifPresent(s -> queryWrapper.likeRight("room_number", s));
         queryWrapper.eq("house_id", dto.getHouseId())
                 .select("id", "room_number", "floor", "price", "status")
-                .orderByDesc("room_number");
+                .orderByAsc("room_number");
         List<Room> roomList = roomMapper.selectList(queryWrapper);
         return roomList.stream()
                 .map(RoomInfoVO::assemble)
