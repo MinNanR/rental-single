@@ -1,5 +1,8 @@
 package site.minnan.rental.infrastructure.security;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import site.minnan.rental.domain.entity.JwtUser;
 import site.minnan.rental.infrastructure.utils.JwtUtil;
 
 import javax.servlet.FilterChain;
@@ -19,9 +23,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Date;
 
 /**
  * jwt过滤器（鉴权）
+ *
  * @author Minnan on 2020/12/16
  */
 @Component
@@ -50,7 +56,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
      * @param filterChain
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
         String requestTokenHeader = request.getHeader(authenticationHeader);
         String username = null;
         String jwtToken = null;
@@ -67,9 +74,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 if (jwtUtil.validateToken(jwtToken, userDetails)) {
-                    UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userDetails,
+                            null, userDetails.getAuthorities());
                     token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(token);
+                    Date expireDate = jwtUtil.getExpirationDateFromToken(jwtToken);
+                    long leftTime = DateUtil.between(expireDate, DateTime.now(), DateUnit.HOUR);
+                    if (leftTime < 24L) {
+                        JwtUser jwtUser = (JwtUser) token.getPrincipal();
+                        String newToken = jwtUtil.generateToken(jwtUser);
+                        response.addHeader("newToken", newToken);
+                    }
                 }
             }
         } else {

@@ -28,7 +28,7 @@ public class RoomController {
     @Autowired
     private RoomService roomService;
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("addRoom")
     public ResponseEntity<?> addRoom(@RequestBody @Valid AddRoomDTO dto) {
         roomService.addRoom(dto);

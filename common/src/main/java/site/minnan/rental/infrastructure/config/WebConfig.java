@@ -27,6 +27,7 @@ public class WebConfig implements WebMvcConfigurer {
         //最终的结果是可以 在跨域请求的时候获取同一个 session
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.addExposedHeader("Content-Disposition");
+        corsConfiguration.addExposedHeader("newtoken");
         return corsConfiguration;
     }
 

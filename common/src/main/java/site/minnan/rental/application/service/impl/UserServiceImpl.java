@@ -19,6 +19,7 @@ import site.minnan.rental.domain.vo.LoginVO;
 import site.minnan.rental.infrastructure.utils.JwtUtil;
 import site.minnan.rental.infrastructure.utils.RedisUtil;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -93,7 +94,7 @@ public class UserServiceImpl implements UserService {
         wrapper.eq("username", username);
         AuthUser userInDB = userMapper.selectOne(wrapper);
         Optional<AuthUser> userOptional = Optional.ofNullable(userInDB);
-        userOptional.ifPresent(user -> redisUtil.valueSet("authUser::" + username, user));
+        userOptional.ifPresent(user -> redisUtil.valueSet("authUser::" + username, user, Duration.ofMinutes(30)));
         return userOptional;
     }
 }

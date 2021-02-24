@@ -1,5 +1,6 @@
 package site.minnan.rental.userinterface.fascade;
 
+import cn.hutool.crypto.digest.MD5;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,5 +73,9 @@ public class UtilityController {
     public ResponseEntity<List<UtilityFileVO>> getUtilityFileList(){
         List<UtilityFileVO> vo = utilityService.getUtilityFileList();
         return ResponseEntity.success(vo);
+    }
+
+    public static void main(String[] args) {
+        MD5.create().digestHex("453869");
     }
 }

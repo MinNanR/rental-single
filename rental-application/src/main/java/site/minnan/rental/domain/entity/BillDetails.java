@@ -1,5 +1,6 @@
 package site.minnan.rental.domain.entity;
 
+import cn.hutool.core.math.MathUtil;
 import lombok.Data;
 import site.minnan.rental.domain.aggregate.Bill;
 
@@ -22,10 +23,16 @@ public class BillDetails extends Bill {
     private BigDecimal electricityEnd;
 
     public void settleWater(BigDecimal price) {
+        BigDecimal waterEnd = this.waterEnd.compareTo(waterStart) < 0 ?
+                this.waterEnd.add(BigDecimal.valueOf(1000)) :
+                this.waterEnd;
         super.settleWater(waterStart, waterEnd, price);
     }
 
     public void settleElectricity(BigDecimal price) {
+        BigDecimal electricityEnd = this.electricityEnd.compareTo(electricityStart) < 0 ?
+                this.electricityEnd.add(BigDecimal.valueOf(1000)) :
+                this.electricityEnd;
         super.settleElectricity(electricityStart, electricityEnd, price);
     }
 }

@@ -2,14 +2,15 @@ package site.minnan.rental.userinterface.response;
 
 /**
  * 返回状态码
+ *
  * @author Minnan on 2020/12/16
  */
-public enum  ResponseCode {
+public enum ResponseCode {
     SUCCESS("000", "操作成功"),
 
-    INVALID_USER("002","非法用户"),
+    INVALID_USER("002", "非法用户"),
 
-    FAIL("001","操作失败"),
+    FAIL("001", "操作失败"),
 
     INVALID_PARAM("005", "参数非法"),
 

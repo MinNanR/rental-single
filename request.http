@@ -15,10 +15,10 @@ Content-Type: application/json
 
 {
   "username": "18925503712",
-  "password": "e10adc3949ba59abbe56e057f20f883e"
+  "password": "d31b530952bdc79c84303e5a9705651c"
 }
 
-> {% client.global.set("landlord_token", `Bearer ${response.body.data.token}`); %}
+> {% client.global.set("landlord_token", "Bearer " + response.body.data.token); %}
 
 ###
 POST {{authUrl}}/auth/login/password
@@ -189,7 +189,7 @@ Authorization: {{admin_token}}
 ###
 POST {{roomUrl}}/room/addRoom
 Content-Type: application/json
-Authorization: {{admin_token}}
+#Authorization: {{landlord_token}}
 
 {
   "houseId": 1,
