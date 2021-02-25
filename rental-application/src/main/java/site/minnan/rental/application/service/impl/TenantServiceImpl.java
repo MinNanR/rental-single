@@ -361,7 +361,7 @@ public class TenantServiceImpl implements TenantService {
         Map<Character, List<TenantAppVO>> groupByPinyin = tenantList.stream()
                 .collect(Collectors.groupingBy(e -> pinyinEngine.getFirstLetter(e.getName().charAt(0)),
                         Collectors.collectingAndThen(Collectors.toList(), (e -> e.stream()
-                                .sorted(Comparator.comparing(t1 -> PinyinUtil.getPinyin(t1.getName())))
+                                .sorted(Comparator.comparing(t1 -> pinyinEngine.getPinyin(t1.getName(),"")))
                                 .map(TenantAppVO::assemble)
                                 .collect(Collectors.toList())))));
         return groupByPinyin.entrySet().stream()

@@ -29,6 +29,8 @@ public class RoomInfoVO {
 
     private Integer price;
 
+    private Integer deposit;
+
     private String status;
 
     private String statusCode;

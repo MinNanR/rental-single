@@ -33,6 +33,6 @@ mybatis-plus:
 
 aliyun:
   bucketName: link-server
-  baseUrl: http://minnan.site:2000
+  baseUrl: https://minnan.site:2005
   receiptFolder: receipt
   utilityFolder: utility

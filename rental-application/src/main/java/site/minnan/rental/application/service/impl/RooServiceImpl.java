@@ -102,7 +102,12 @@ public class RooServiceImpl implements RoomService {
         if (room == null) {
             throw new EntityNotExistException("房间不存在");
         }
-        return RoomInfoVO.assemble(room);
+        RoomInfoVO vo = RoomInfoVO.assemble(room);
+        if (RoomStatus.ON_RENT.equals(room.getStatus())) {
+            Integer currentDeposit = roomMapper.getCurrentDeposit(room.getId());
+            vo.setDeposit(currentDeposit);
+        }
+        return vo;
     }
 
     /**

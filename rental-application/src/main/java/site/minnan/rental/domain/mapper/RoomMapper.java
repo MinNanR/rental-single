@@ -34,4 +34,11 @@ public interface RoomMapper extends BaseMapper<Room> {
 
     List<UtilityInitVO> getRoomList(@Param("houseId")Integer houseId, @Param("floor")Integer floor,
                                     @Param("status") String status);
+
+    /**
+     * 获取当前押金
+     * @param roomId
+     * @return
+     */
+    Integer getCurrentDeposit(@Param("roomId")Integer roomId);
 }

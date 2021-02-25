@@ -78,7 +78,7 @@ public class BillProviderServiceImpl implements BillProviderService {
                 .deposit(dto.getDeposit())
                 .rent(roomInfo.getInt("price"))
                 .remark(dto.getRemark())
-                .completedDate(oneMonthLater)
+                .completedDate(checkDate)
                 .startDate(checkDate)
                 .endDate(oneMonthLater)
                 .payTime(new Timestamp(checkDate.getTime()))
