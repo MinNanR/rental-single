@@ -5,6 +5,7 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -36,6 +37,7 @@ import site.minnan.rental.infrastructure.enumerate.BillType;
 import site.minnan.rental.infrastructure.enumerate.PaymentMethod;
 import site.minnan.rental.infrastructure.enumerate.RoomStatus;
 import site.minnan.rental.infrastructure.exception.EntityNotExistException;
+import site.minnan.rental.infrastructure.exception.UnmodifiableException;
 import site.minnan.rental.infrastructure.utils.ReceiptUtils;
 import site.minnan.rental.infrastructure.utils.RedisUtil;
 import site.minnan.rental.userinterface.dto.*;
@@ -121,7 +123,7 @@ public class BillServiceImpl implements BillService {
      */
     @Override
     @Transactional
-    public void setBillUnpaid() {
+    public void setBillUnconfirmed() {
         //将到期账单状态设置为等待登记水电
         DateTime now = DateTime.now();
         Timestamp currentTime = new Timestamp(now.getTime());
@@ -139,11 +141,11 @@ public class BillServiceImpl implements BillService {
                 bill.settleElectricity(price.getElectricityPrice());
                 bill.setUpdateUser(JwtUser.builder().id(0).realName("系统").build());
                 bill.unconfirmed();
-                try {
-                    receiptUtils.generateReceipt(bill);
-                } catch (IOException e) {
-                    log.error("生成收据失败，账单id={}", bill.getId());
-                }
+//                try {
+//                    receiptUtils.generateReceipt(bill);
+//                } catch (IOException e) {
+//                    log.error("生成收据失败，账单id={}", bill.getId());
+//                }
                 utilityMap.put(bill.getRoomId(), bill.getUtilityEndId());
             }
             //更新
@@ -278,7 +280,8 @@ public class BillServiceImpl implements BillService {
         Page<Bill> queryPage = new Page<>(dto.getPageIndex(), dto.getPageSize());
         QueryWrapper<Bill> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("room_id", dto.getRoomId())
-                .ne("status", BillStatus.INIT);
+                .ne("status", BillStatus.INIT)
+                .orderByDesc("end_date");
         IPage<Bill> page = billMapper.selectPage(queryPage, queryWrapper);
         List<BillVO> list = page.getRecords().stream().map(BillVO::assemble).collect(Collectors.toList());
         return new ListQueryVO<>(list, page.getTotal());
@@ -373,9 +376,16 @@ public class BillServiceImpl implements BillService {
      */
     @Override
     public void confirmBill(DetailsQueryDTO dto) {
-        Bill bill = billMapper.selectById(dto.getId());
+        BillDetails bill = billMapper.getBillDetails(dto.getId());
         if (bill == null) {
             throw new EntityNotExistException("账单不存在");
+        }
+        if (StrUtil.isBlank(bill.getReceiptUrl())) {
+            try {
+                receiptUtils.generateReceipt(bill);
+            } catch (IOException e) {
+                log.error("生成收据IO异常，id={}", bill.getId());
+            }
         }
         UpdateWrapper<Bill> updateWrapper = new UpdateWrapper<>();
         updateWrapper.set("status", BillStatus.UNPAID).eq("id", dto.getId());
@@ -400,5 +410,48 @@ public class BillServiceImpl implements BillService {
                 .set("pay_time", new Timestamp(System.currentTimeMillis()))
                 .eq("id", dto.getId());
         billMapper.update(null, updateWrapper);
+    }
+
+    /**
+     * 触发结算账单
+     *
+     * @param dto 房间id
+     */
+    @Override
+    public void triggerSetBillUnconfirmed(DetailsQueryDTO dto) {
+        BillDetails bill = billMapper.getBillDetailsByRoomId(dto.getId());
+        if (bill != null && bill.getCompletedDate().before(DateTime.now())) {
+            JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            UtilityPrice price = getUtilityPrice();
+            bill.settleWater(price.getWaterPrice());
+            bill.settleElectricity(price.getElectricityPrice());
+            bill.setUpdateUser(jwtUser);
+            bill.unconfirmed();
+            billMapper.settleBatch(Collections.singletonList(bill));
+            JSONObject room = roomProviderService.getRoomInfo(dto.getId());
+            if (Objects.equals(room.getStr("status"), RoomStatus.ON_RENT.getValue())) {
+                DateTime time = DateTime.of(bill.getCompletedDate());
+                Bill newBill = Bill.builder()
+                        .year(time.year())
+                        .month(time.month())
+                        .houseId(bill.getHouseId())
+                        .houseName(bill.getHouseName())
+                        .roomId(bill.getRoomId())
+                        .roomNumber(bill.getRoomNumber())
+                        .rent(room.getInt("price"))
+                        .completedDate(time.offsetNew(DateField.MONTH, 1))
+                        .startDate(time.offsetNew(DateField.MONTH, 1))
+                        .endDate(time.offsetNew(DateField.MONTH, 2))
+                        .utilityStartId(bill.getUtilityEndId())
+                        .status(BillStatus.INIT)
+                        .type(BillType.MONTHLY)
+                        .build();
+                newBill.setCreateUser(jwtUser.getId(), jwtUser.getRealName(),
+                        new Timestamp(System.currentTimeMillis()));
+                billMapper.insert(newBill);
+            }
+        } else {
+            throw new UnmodifiableException("当前房间未到结算日");
+        }
     }
 }

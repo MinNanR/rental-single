@@ -74,8 +74,4 @@ public class UtilityController {
         List<UtilityFileVO> vo = utilityService.getUtilityFileList();
         return ResponseEntity.success(vo);
     }
-
-    public static void main(String[] args) {
-        MD5.create().digestHex("453869");
-    }
 }

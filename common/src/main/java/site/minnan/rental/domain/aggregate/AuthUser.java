@@ -66,6 +66,11 @@ public class AuthUser {
     private String phone;
 
     /**
+     * 密码戳，鉴别是否已修改
+     */
+    private String passwordStamp;
+
+    /**
      * 创建时间
      */
     private Timestamp createTime;

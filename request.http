@@ -93,7 +93,7 @@ Authorization: {{admin_token}}
 }
 
 ###
-POST http://localhost:2000/house/getHouseList
+POST {{houseUrl}}/house/getHouseList
 Content-Type: application/json
 Authorization: {{admin_token}}
 
@@ -414,12 +414,12 @@ Authorization: {{admin_token}}
 }
 
 ###
-POST http://localhost:2000/rental/bill/getBillInfo
+POST {{billUrl}}/bill/getBillInfo
 Content-Type: application/json
 Authorization: {{admin_token}}
 
 {
-  "id": 115
+  "id": 84
 }
 
 ###
@@ -533,7 +533,7 @@ Content-Type: application/json
 Authorization: {{admin_token}}
 
 {
-  "id": 114
+  "id": 131
 }
 
 ###
@@ -555,3 +555,4 @@ Authorization: {{admin_token}}
 {
   "idList": [21]
 }
+

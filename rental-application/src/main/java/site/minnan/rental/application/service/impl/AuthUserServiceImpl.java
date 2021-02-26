@@ -26,6 +26,7 @@ import site.minnan.rental.userinterface.dto.*;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -92,6 +93,7 @@ public class AuthUserServiceImpl implements AuthUserService {
                 .phone(dto.getPhone())
                 .enabled(AuthUser.ENABLE)
                 .role(Role.valueOf(dto.getRole().toUpperCase()))
+                .passwordStamp(UUID.randomUUID().toString().replace("-", ""))
                 .build();
 
         newUser.setCreateUser(user);
@@ -112,7 +114,8 @@ public class AuthUserServiceImpl implements AuthUserService {
         }
         UpdateWrapper<AuthUser> wrapper = new UpdateWrapper<>();
         wrapper.eq("id", dto.getId());
-        Optional.ofNullable(dto.getPassword()).ifPresent(s -> wrapper.set("password", passwordEncoder.encode(s)));
+        Optional.ofNullable(dto.getPassword()).ifPresent(s -> wrapper.set("password", passwordEncoder.encode(s)).set(
+                "password_stamp", UUID.randomUUID().toString().replace("-", "")));
         Optional.ofNullable(dto.getRealName()).ifPresent(s -> wrapper.set("real_name", s));
         Optional.ofNullable(dto.getPhone()).ifPresent(s -> wrapper.set("phone", s));
         JwtUser principal = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

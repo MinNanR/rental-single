@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -19,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * SpringSecurity配置（仅验证）
+ *
  * @author Minnan on 2020/12/16
  */
 @Component
@@ -28,6 +31,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
 
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -36,7 +45,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling()
                 .authenticationEntryPoint((request, response, ex) -> {
                     log.error("登录异常", ex);
-                    if(ex instanceof InsufficientAuthenticationException){
+                    if (ex instanceof InsufficientAuthenticationException) {
                         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "缺失用户身份");
                     }else{
                         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
@@ -65,7 +74,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }

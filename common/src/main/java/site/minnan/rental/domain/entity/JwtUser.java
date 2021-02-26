@@ -9,6 +9,7 @@ import java.util.Collection;
 
 /**
  * JWT实体类
+ *
  * @author Minnan on 2020/12/16
  */
 @Data
@@ -49,6 +50,11 @@ public class JwtUser implements UserDetails {
      * 真实姓名
      */
     private String realName;
+
+    /**
+     * 密码戳，鉴别密码版本
+     */
+    private String passwordStamp;
 
 
     /**

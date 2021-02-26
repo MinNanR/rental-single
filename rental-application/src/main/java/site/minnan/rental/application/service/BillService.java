@@ -31,7 +31,7 @@ public interface BillService {
     void setUtilityPrice(SetUtilityPriceDTO dto);
 
     /**
-     * 获取水电单价
+     * 获取水电单价，门卡
      *
      * @return
      */
@@ -60,6 +60,7 @@ public interface BillService {
 
     /**
      * 查询账单列表（管理平台）
+     *
      * @param dto
      * @return
      */
@@ -103,12 +104,20 @@ public interface BillService {
 
     /**
      * 房客已支付
+     *
      * @param dto
      */
     void billPaid(BillPaidDTO dto);
 
     /**
+     * 触发结算账单
+     *
+     * @param dto 房间id
+     */
+    void triggerSetBillUnconfirmed(DetailsQueryDTO dto);
+
+    /**
      * 到期账单结算
      */
-    void setBillUnpaid();
+    void setBillUnconfirmed();
 }

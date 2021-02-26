@@ -20,7 +20,7 @@ public class Scheduler {
     @Scheduled(cron = "0 0 0 * * *")
     public void billTask(){
         log.info("修改账单状态开始");
-        billService.setBillUnpaid();
+        billService.setBillUnconfirmed();
         log.info("修改账单状态结束");
     }
 

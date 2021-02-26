@@ -15,6 +15,7 @@ import java.util.function.Function;
 
 /**
  * JWT相关操作
+ *
  * @author Minnan on 2020/12/16
  */
 @Component
@@ -57,20 +58,22 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS512, secret).compact();
     }
 
-    public String generateToken(UserDetails userDetails){
+    public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         return doGenerateToken(claims, userDetails.getUsername());
     }
 
-    public String generateToken(JwtUser jwtUser){
+    public String generateToken(JwtUser jwtUser) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("realName", jwtUser.getRealName());
         claims.put("id", jwtUser.getId());
+        claims.put("stamp", jwtUser.getPasswordStamp());
         return doGenerateToken(claims, jwtUser.getUsername());
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails){
-        String username = getUsernameFromToken(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public Boolean validateToken(String token, JwtUser userDetails) {
+        String username = getClaimFromToken(token, Claims::getSubject);
+        String stamp = getClaimFromToken(token, e -> e.get("stamp", String.class));
+        return (username.equals(userDetails.getUsername()) && stamp != null && stamp.equals(userDetails.getPasswordStamp()) && !isTokenExpired(token));
     }
 }

@@ -67,6 +67,7 @@ public class UserServiceImpl implements UserService {
                 .authorities(grantedAuthorities)
                 .enabled(authUser.getEnabled().equals(1))
                 .realName(authUser.getRealName())
+                .passwordStamp(authUser.getPasswordStamp())
                 .build();
     }
 

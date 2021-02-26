@@ -150,4 +150,11 @@ public class BillController {
         ListQueryVO<BillVO> vo = billService.getRoomBillList(dto);
         return ResponseEntity.success(vo);
     }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PostMapping("triggerSetBillUnconfirmed")
+    public ResponseEntity<?> triggerSetBillUnconfirmed(@RequestBody @Valid DetailsQueryDTO dto){
+        billService.triggerSetBillUnconfirmed(dto);
+        return ResponseEntity.success();
+    }
 }

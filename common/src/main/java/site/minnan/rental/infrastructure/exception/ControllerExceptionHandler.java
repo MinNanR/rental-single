@@ -110,7 +110,7 @@ public class ControllerExceptionHandler {
     @ResponseBody
     public ResponseEntity<?> handleUnmodifiableException(UnmodifiableException ex){
         log.error("实体不可修改", ex);
-        return ResponseEntity.fail(ResponseCode.FAIL, ex.getMessage());
+        return ResponseEntity.fail(ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
