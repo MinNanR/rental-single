@@ -11,9 +11,7 @@ import cn.hutool.core.text.csv.CsvWriter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aliyun.oss.OSS;
-import com.aliyun.oss.model.OSSObject;
-import com.aliyun.oss.model.OSSObjectSummary;
-import com.aliyun.oss.model.ObjectListing;
+import com.aliyun.oss.model.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -205,21 +203,35 @@ public class UtilityServiceImpl implements UtilityService {
     public void backUpUtility() {
         QueryWrapper<Utility> queryWrapper = new QueryWrapper<>();
         DateTime lastMonth = DateTime.now().offset(DateField.MONTH, -1);
-        queryWrapper.eq("year", lastMonth.year())
-                .eq("month", lastMonth.month() + 1)
+        queryWrapper.eq("year(create_time)", lastMonth.year())
+                .eq("month(create_time)", lastMonth.month() + 1)
                 .orderByAsc("update_time");
         List<Utility> utilityList = utilityMapper.selectList(queryWrapper);
-        Map<String, List<Utility>> groupByHouseName = utilityList.stream()
-                .collect(Collectors.groupingBy(Utility::getHouseName, Collectors.collectingAndThen(Collectors.toList(),
-                        e -> e.stream().sorted(Comparator.comparing(Utility::getRoomNumber)).collect(Collectors.toList()))));
-        String time = DateUtil.format(lastMonth, "yyyy年M月");
-        groupByHouseName.forEach((key, value) -> {
+//        Map<String, List<Utility>> groupByHouseName = utilityList.stream()
+//                .collect(Collectors.groupingBy(Utility::getHouseName, Collectors.collectingAndThen(Collectors
+//                .toList(),
+//                        e -> e.stream().sorted(Comparator.comparing(Utility::getRoomNumber)).collect(Collectors
+//                        .toList()))));
+//        String time = DateUtil.format(lastMonth, "yyyy年M月");
+//        groupByHouseName.forEach((key, value) -> {
+//            try {
+//                saveToCsv(key, time, value);
+//            } catch (IOException e) {
+//                log.error("备份水电记录失败，房屋：{}，时间：{}", key, time);
+//            }
+//        });
+        int year = DateUtil.year(lastMonth);
+        utilityList.stream()
+                .collect(Collectors.groupingBy(e -> StrUtil.format("{}-{}", e.getHouseName(), e.getRoomNumber())))
+                .entrySet().forEach(entry -> {
             try {
-                saveToCsv(key, time, value);
+                appendToCsv(entry.getValue(), entry.getKey(), year);
             } catch (IOException e) {
-                log.error("备份水电记录失败，房屋：{}，时间：{}", key, time);
+                log.error("备份水电记录失败，房间：{}，时间：{}", entry.getValue(), DateUtil.format(lastMonth, "yyyy-MM"));
             }
         });
+
+
     }
 
     /**
@@ -245,7 +257,7 @@ public class UtilityServiceImpl implements UtilityService {
         BufferedInputStream is = FileUtil.getInputStream(temp);
         String ossKey = StrUtil.format("{}/{}{}水电记录.csv", folder, houseName, time);
         oss.putObject(bucketName, ossKey, is);
-        log.info("备份{}完成" + StrUtil.format("{}{}水电记录", houseName, time));
+        log.info("备份{}完成", StrUtil.format("{}{}水电记录", houseName, time));
     }
 
     /**
@@ -255,11 +267,39 @@ public class UtilityServiceImpl implements UtilityService {
      */
     @Override
     public List<UtilityFileVO> getUtilityFileList() {
-        ObjectListing objectListing = oss.listObjects(bucketName, folder);
+        ListObjectsRequest listObjectsRequest = new ListObjectsRequest(bucketName, folder + "/", null, null, 1000);
+        ObjectListing objectListing = oss.listObjects(listObjectsRequest);
         List<OSSObjectSummary> objects = objectListing.getObjectSummaries();
         return objects.stream()
                 .map(e -> new UtilityFileVO(StrUtil.subBetween(e.getKey(), folder + "/", ".csv"),
                         StrUtil.format("{}/{}", baseUrl, e.getKey())))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 追加到csv中
+     *
+     * @param utilityList 水电数据
+     */
+    public void appendToCsv(List<Utility> utilityList, String houseNameAndRoomNumber, int year) throws IOException {
+        File temp = File.createTempFile("temp", ".csv");
+        CsvWriter writer = CsvUtil.getWriter(temp, CharsetUtil.CHARSET_GBK, true);
+        String ossKey = StrUtil.format("{}/{}号房{}年水电记录.csv", folder, houseNameAndRoomNumber, year);
+        if (!oss.doesObjectExist(bucketName, ossKey)) {
+            writer.write(new String[]{"时间", "水表行度", "电表行度"});
+        } else {
+            oss.getObject(new GetObjectRequest(bucketName, ossKey), temp);
+        }
+        for (Utility utility : utilityList) {
+            writer.write(new String[]{DateUtil.format(utility.getCreateTime(), "M月d日"),
+                    String.valueOf(utility.getWater().intValue()),
+                    String.valueOf(utility.getElectricity().intValue())
+            });
+        }
+        writer.flush();
+        writer.close();
+        BufferedInputStream is = FileUtil.getInputStream(temp);
+        oss.putObject(bucketName, ossKey, is);
+        log.info("备份{}完成", StrUtil.format("{}水电记录", houseNameAndRoomNumber));
     }
 }

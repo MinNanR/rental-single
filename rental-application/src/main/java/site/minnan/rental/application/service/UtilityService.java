@@ -1,5 +1,6 @@
 package site.minnan.rental.application.service;
 
+import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.vo.ListQueryVO;
 import site.minnan.rental.domain.vo.UtilityFileVO;
 import site.minnan.rental.domain.vo.UtilityRecordVO;
@@ -9,6 +10,7 @@ import site.minnan.rental.userinterface.dto.GetRecordListDTO;
 import site.minnan.rental.userinterface.dto.GetUtilityDTO;
 import site.minnan.rental.userinterface.dto.UpdateUtilityDTO;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface UtilityService {

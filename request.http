@@ -556,3 +556,12 @@ Authorization: {{admin_token}}
   "idList": [21]
 }
 
+###
+POST {{utilityUrl}}/utility/getRecordFile
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "pageSize":10,
+  "pageIndex": 1
+}
