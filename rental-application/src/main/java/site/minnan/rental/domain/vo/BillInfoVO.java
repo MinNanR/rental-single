@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import lombok.Builder;
 import lombok.Data;
 import site.minnan.rental.domain.aggregate.Bill;
+import site.minnan.rental.domain.entity.BillDetails;
 import site.minnan.rental.infrastructure.enumerate.PaymentMethod;
 
 import java.math.BigDecimal;
@@ -33,8 +34,6 @@ public class BillInfoVO {
     private Integer month;
 
     private String roomNumber;
-
-    private List<TenantInfoVO> tenantList;
 
     private BigDecimal waterUsage;
 
@@ -74,6 +73,14 @@ public class BillInfoVO {
 
     private String receiptUrl;
 
+    private BigDecimal waterStart;
+
+    private BigDecimal waterEnd;
+
+    private BigDecimal electricityStart;
+
+    private BigDecimal electricityEnd;
+
     public static BillInfoVO assemble(Bill bill) {
         return BillInfoVO.builder()
                 .id(bill.getId())
@@ -102,11 +109,41 @@ public class BillInfoVO {
                 .type(bill.getType().getType())
                 .typeCode(bill.getType().getValue())
                 .receiptUrl(bill.getReceiptUrl())
-                .tenantList(new ArrayList<>())
                 .build();
     }
 
-    public void addTenant(TenantInfoVO vo) {
-        tenantList.add(vo);
+    public static BillInfoVO assemble(BillDetails bill) {
+        return BillInfoVO.builder()
+                .id(bill.getId())
+                .houseId(bill.getHouseId())
+                .houseName(bill.getHouseName())
+                .roomId(bill.getRoomId())
+                .roomNumber(bill.getRoomNumber())
+                .year(bill.getYear())
+                .month(bill.getMonth())
+                .waterUsage(bill.getWaterUsage())
+                .waterCharge(bill.getWaterCharge())
+                .electricityUsage(bill.getElectricityUsage())
+                .electricityCharge(bill.getElectricityCharge())
+                .rent(bill.getRent())
+                .deposit(bill.getDeposit())
+                .accessCardQuantity(bill.getAccessCardQuantity())
+                .accessCardCharge(bill.getAccessCardCharge())
+                .totalCharge(bill.totalCharge())
+                .updateTime(DateUtil.format(bill.getUpdateTime(), "MM-dd"))
+                .completeDate(DateUtil.format(bill.getCompletedDate(), "MM-dd"))
+                .payTime(DateUtil.format(bill.getPayTime(), "MM-dd"))
+                .paymentMethod(Optional.ofNullable(bill.getPaymentMethod()).map(PaymentMethod::getMethod).orElse(""))
+                .paymentMethodCode(Optional.ofNullable(bill.getPaymentMethod()).map(PaymentMethod::getValue).orElse(""))
+                .status(bill.getStatus().getStatus())
+                .statusCode(bill.getStatus().getValue())
+                .type(bill.getType().getType())
+                .typeCode(bill.getType().getValue())
+                .receiptUrl(bill.getReceiptUrl())
+                .waterStart(bill.getWaterStart())
+                .waterEnd(bill.getWaterEnd())
+                .electricityStart(bill.getElectricityStart())
+                .electricityEnd(bill.getElectricityEnd())
+                .build();
     }
 }

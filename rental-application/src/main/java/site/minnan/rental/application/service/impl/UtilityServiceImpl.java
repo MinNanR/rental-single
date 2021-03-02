@@ -1,5 +1,6 @@
 package site.minnan.rental.application.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUnit;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.minnan.rental.application.provider.BillProviderService;
 import site.minnan.rental.application.service.UtilityService;
 import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.entity.JwtUser;
@@ -59,6 +61,9 @@ public class UtilityServiceImpl implements UtilityService {
     private UtilityRecordMapper utilityRecordMapper;
 
     @Autowired
+    private BillProviderService billProviderService;
+
+    @Autowired
     private OSS oss;
 
     @Autowired
@@ -92,6 +97,7 @@ public class UtilityServiceImpl implements UtilityService {
                 .set("status", UtilityStatus.RECORDED);
         utilityMapper.update(null, updateWrapper);
         utilityMapper.addUtilityBatch(newUtilityList);
+        billProviderService.completeBill(roomIdSet);
     }
 
     /**
@@ -112,6 +118,7 @@ public class UtilityServiceImpl implements UtilityService {
                 .set("status", UtilityStatus.RECORDED);
         utilityMapper.update(null, updateWrapper);
         utilityMapper.insert(utility);
+        billProviderService.completeBill(Collections.singletonList(dto.getRoomId()));
     }
 
     /**

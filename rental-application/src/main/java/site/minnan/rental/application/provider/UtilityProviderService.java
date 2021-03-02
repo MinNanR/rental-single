@@ -1,5 +1,6 @@
 package site.minnan.rental.application.provider;
 
+import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.vo.SettleQueryVO;
 import site.minnan.rental.userinterface.dto.NewRoomUtilityDTO;
 import site.minnan.rental.userinterface.dto.SettleQueryDTO;
@@ -29,6 +30,14 @@ public interface UtilityProviderService {
      * @return 当前水电度数记录id
      */
     Integer getCurrentUtility(Integer roomId);
+
+    /**
+     * 根据房屋id获取当前水电行度
+     *
+     * @param houseId 房屋id
+     * @return key:房间id，value：当前行度
+     */
+    Map<Integer, Utility> getCurrentUtilityByHouse(Integer houseId);
 
     /**
      * 查询水电

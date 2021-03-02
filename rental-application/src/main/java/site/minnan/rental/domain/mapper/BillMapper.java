@@ -75,4 +75,12 @@ public interface BillMapper extends BaseMapper<Bill> {
      * @return
      */
     BillDetails getBillDetailsByRoomId(@Param("id") Integer roomId);
+
+    /**
+     * 根据房间id批量获取处于初始化的账单
+     *
+     * @param roomIds
+     * @return
+     */
+    List<BillDetails> getBillDetailsList(@Param("roomIds") Iterable<Integer> roomIds);
 }

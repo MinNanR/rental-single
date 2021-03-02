@@ -1,4 +1,4 @@
-package site.minnan.rental.application.provider;
+package site.minnan.rental.application.provider.impl;
 
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.minnan.rental.application.provider.RoomProviderService;
 import site.minnan.rental.domain.aggregate.Room;
 import site.minnan.rental.domain.mapper.RoomMapper;
 import site.minnan.rental.infrastructure.enumerate.RoomStatus;
@@ -95,8 +96,7 @@ public class RoomProviderServiceImpl implements RoomProviderService {
      * @return
      */
     @Override
-    public JSONArray getRoomInfoBatch(Collection<Integer> ids) {
-        List<Room> rooms = roomMapper.selectBatchIds(ids);
-        return new JSONArray(rooms);
+    public List<Room> getRoomInfoBatch(Collection<Integer> ids) {
+        return roomMapper.selectBatchIds(ids);
     }
 }

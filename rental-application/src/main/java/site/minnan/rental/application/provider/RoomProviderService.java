@@ -2,6 +2,7 @@ package site.minnan.rental.application.provider;
 
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import site.minnan.rental.domain.aggregate.Room;
 import site.minnan.rental.userinterface.dto.UpdateRoomStatusDTO;
 
 import java.util.Collection;
@@ -43,5 +44,5 @@ public interface RoomProviderService {
      * @param ids
      * @return
      */
-    JSONArray getRoomInfoBatch(Collection<Integer> ids);
+    List<Room> getRoomInfoBatch(Collection<Integer> ids);
 }

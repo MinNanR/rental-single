@@ -1,4 +1,4 @@
-package site.minnan.rental.application.provider;
+package site.minnan.rental.application.provider.impl;
 
 import cn.hutool.crypto.digest.MD5;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.minnan.rental.application.provider.UserProviderService;
 import site.minnan.rental.domain.aggregate.AuthUser;
 import site.minnan.rental.domain.mapper.UserMapper;
 import site.minnan.rental.infrastructure.enumerate.Role;

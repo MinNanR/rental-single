@@ -22,6 +22,7 @@ import site.minnan.rental.application.provider.TenantProviderService;
 import site.minnan.rental.application.provider.UtilityProviderService;
 import site.minnan.rental.application.service.BillService;
 import site.minnan.rental.domain.aggregate.Bill;
+import site.minnan.rental.domain.aggregate.Room;
 import site.minnan.rental.domain.entity.BillDetails;
 import site.minnan.rental.domain.entity.BillTenantEntity;
 import site.minnan.rental.domain.entity.BillTenantRelevance;
@@ -153,25 +154,25 @@ public class BillServiceImpl implements BillService {
 
             //生成新的账单
             List<Integer> roomIdList = initializedBillList.stream().map(Bill::getRoomId).collect(Collectors.toList());
-            JSONArray roomInfoList = roomProviderService.getRoomInfoBatch(roomIdList);
+            List<Room> roomInfoList = roomProviderService.getRoomInfoBatch(roomIdList);
             DateTime oneMonthLater = now.offsetNew(DateField.MONTH, 1);
             DateTime twoMonthLater = oneMonthLater.offsetNew(DateField.MONTH, 2);
             List<Bill> newBillList = new ArrayList<>();
             for (int i = 0; i < roomInfoList.size(); i++) {
-                JSONObject roomInfo = roomInfoList.getJSONObject(i);
-                if (Objects.equals(roomInfo.getStr("status"), RoomStatus.ON_RENT.getValue())) {
+                Room roomInfo = roomInfoList.get(i);
+                if (Objects.equals(roomInfo.getStatus(), RoomStatus.ON_RENT)) {
                     Bill newBill = Bill.builder()
                             .year(now.year())
                             .month(now.month())
-                            .houseId(roomInfo.getInt("houseId"))
-                            .houseName(roomInfo.getStr("houseName"))
-                            .roomId(roomInfo.getInt("id"))
-                            .roomNumber(roomInfo.getStr("roomNumber"))
-                            .rent(roomInfo.getInt("price"))
+                            .houseId(roomInfo.getHouseId())
+                            .houseName(roomInfo.getHouseName())
+                            .roomId(roomInfo.getId())
+                            .roomNumber(roomInfo.getRoomNumber())
+                            .rent(roomInfo.getPrice())
                             .completedDate(oneMonthLater)
                             .startDate(oneMonthLater)
                             .endDate(twoMonthLater)
-                            .utilityStartId(utilityMap.get(roomInfo.getInt("id")))
+                            .utilityStartId(utilityMap.get(roomInfo.getId()))
                             .status(BillStatus.INIT)
                             .type(BillType.MONTHLY)
                             .build();
@@ -248,7 +249,8 @@ public class BillServiceImpl implements BillService {
      */
     @Override
     public BillInfoVO getBillInfo(DetailsQueryDTO dto) {
-        Bill bill = billMapper.selectById(dto.getId());
+//        Bill bill = billMapper.selectById(dto.getId());
+        BillDetails bill = billMapper.getBillDetails(dto.getId());
         BillInfoVO vo = BillInfoVO.assemble(bill);
         return vo;
     }
@@ -330,6 +332,7 @@ public class BillServiceImpl implements BillService {
      * @param dto
      */
     @Override
+    @Transactional
     public void correctUtility(DetailsQueryDTO dto) {
         Bill bill = billMapper.selectById(dto.getId());
         if (bill == null) {
@@ -339,34 +342,38 @@ public class BillServiceImpl implements BillService {
         Integer currentUtilityId = utilityProviderService.getCurrentUtility(bill.getRoomId());
         //更新当前未结算账单关联的结束水电记录id
         UpdateWrapper<Bill> unconfirmedUpdateWrapper = new UpdateWrapper<>();
-        unconfirmedUpdateWrapper.set("utility_end_id", currentUtilityId).eq("id", dto.getId());
+        if (BillType.CHECK_IN.equals(bill.getType())) {
+            unconfirmedUpdateWrapper.set("utility_start_id", currentUtilityId).eq("id", dto.getId());
+        }else{
+            unconfirmedUpdateWrapper.set("utility_end_id", currentUtilityId).eq("id", dto.getId());
+            //获取更新后的当前账单记录
+            UtilityPrice price = getUtilityPrice();
+            //结算各项记录
+            BillDetails billDetails = billMapper.getBillDetails(dto.getId());
+            billDetails.settleWater(price.getWaterPrice());
+            billDetails.settleElectricity(price.getElectricityPrice());
+            billDetails.setUpdateUser(JwtUser.builder().id(0).realName("系统").build());
+            UpdateWrapper<Bill> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.set("water_usage", billDetails.getWaterUsage())
+                    .set("water_charge", billDetails.getWaterCharge())
+                    .set("electricity_usage", billDetails.getElectricityUsage())
+                    .set("electricity_charge", billDetails.getElectricityCharge())
+                    .eq("id", bill.getId());
+            billMapper.update(null, updateWrapper);
+            UpdateWrapper<Bill> initUpdateWrapper = new UpdateWrapper<>();
+            initUpdateWrapper.set("utility_start_id", currentUtilityId)
+                    .eq("room_id", bill.getRoomId())
+                    .eq("status", BillStatus.INIT);
+            billMapper.update(null, initUpdateWrapper);
+        }
         billMapper.update(null, unconfirmedUpdateWrapper);
         //更新当前使用的账单关联的开始水电记录id
-        UpdateWrapper<Bill> initUpdateWrapper = new UpdateWrapper<>();
-        initUpdateWrapper.set("utility_start_id", currentUtilityId)
-                .eq("room_id", bill.getRoomId())
-                .eq("status", BillStatus.INIT);
-        billMapper.update(null, initUpdateWrapper);
-        //获取更新后的当前账单记录
-        UtilityPrice price = getUtilityPrice();
-        //结算各项记录
-        BillDetails billDetails = billMapper.getBillDetails(dto.getId());
-        billDetails.settleWater(price.getWaterPrice());
-        billDetails.settleElectricity(price.getElectricityPrice());
-        billDetails.setUpdateUser(JwtUser.builder().id(0).realName("系统").build());
-        try {
-            receiptUtils.generateReceipt(billDetails);
-        } catch (IOException e) {
-            log.error("生成收据失败，账单id={}", bill.getId());
-        }
-        UpdateWrapper<Bill> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("receipt_url", billDetails.getReceiptUrl())
-                .set("water_usage", billDetails.getWaterUsage())
-                .set("water_charge", billDetails.getWaterCharge())
-                .set("electricity_usage", billDetails.getElectricityUsage())
-                .set("electricity_charge", billDetails.getElectricityCharge())
-                .eq("id", bill.getId());
-        billMapper.update(null, updateWrapper);
+//        try {
+//            receiptUtils.generateReceipt(billDetails);
+//        } catch (IOException e) {
+//            log.error("生成收据失败，账单id={}", bill.getId());
+//        }
+
     }
 
     /**
@@ -380,15 +387,22 @@ public class BillServiceImpl implements BillService {
         if (bill == null) {
             throw new EntityNotExistException("账单不存在");
         }
+        UpdateWrapper<Bill> updateWrapper = new UpdateWrapper<>();
+        if(BillType.CHECK_IN.equals(bill.getType())){
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            updateWrapper.set("status", BillStatus.PAID).set("pay_time", timestamp);
+        }else{
+            updateWrapper.set("status", BillStatus.UNPAID);
+        }
+        updateWrapper.eq("id", dto.getId());
         if (StrUtil.isBlank(bill.getReceiptUrl())) {
             try {
                 receiptUtils.generateReceipt(bill);
+                updateWrapper.set("receipt_url", bill.getReceiptUrl());
             } catch (IOException e) {
                 log.error("生成收据IO异常，id={}", bill.getId());
             }
         }
-        UpdateWrapper<Bill> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("status", BillStatus.UNPAID).eq("id", dto.getId());
         billMapper.update(null, updateWrapper);
     }
 

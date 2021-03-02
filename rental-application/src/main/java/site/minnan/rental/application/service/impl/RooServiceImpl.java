@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import site.minnan.rental.application.provider.UtilityProviderService;
-import site.minnan.rental.application.provider.UtilityProviderServiceImpl;
 import site.minnan.rental.application.service.RoomService;
 import site.minnan.rental.domain.aggregate.Room;
+import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.entity.JwtUser;
 import site.minnan.rental.domain.mapper.RoomMapper;
 import site.minnan.rental.domain.vo.*;
@@ -21,10 +21,7 @@ import site.minnan.rental.userinterface.dto.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -174,8 +171,13 @@ public class RooServiceImpl implements RoomService {
                 .select("id", "room_number", "floor", "price", "status")
                 .orderByAsc("room_number");
         List<Room> roomList = roomMapper.selectList(queryWrapper);
+        Map<Integer, Utility> utilityMap = utilityProviderService.getCurrentUtilityByHouse(dto.getHouseId());
         return roomList.stream()
-                .map(RoomInfoVO::assemble)
+                .map(e -> {
+                    RoomInfoVO vo = RoomInfoVO.assemble(e);
+                    vo.setUtility(utilityMap.get(e.getId()));
+                    return vo;
+                })
                 .collect(Collectors.groupingBy(RoomInfoVO::getFloor,
                         Collectors.collectingAndThen(Collectors.toList(), e -> {
                             Integer floor = e.stream().findFirst().map(RoomInfoVO::getFloor).orElse(0);

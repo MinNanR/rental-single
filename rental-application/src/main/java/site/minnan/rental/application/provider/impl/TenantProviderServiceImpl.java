@@ -1,10 +1,11 @@
-package site.minnan.rental.application.provider;
+package site.minnan.rental.application.provider.impl;
 
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import site.minnan.rental.application.provider.TenantProviderService;
 import site.minnan.rental.domain.aggregate.Tenant;
 import site.minnan.rental.domain.mapper.TenantMapper;
 

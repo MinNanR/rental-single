@@ -1,15 +1,24 @@
-package site.minnan.rental.application.provider;
+package site.minnan.rental.application.provider.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import site.minnan.rental.application.provider.BillProviderService;
+import site.minnan.rental.application.provider.RoomProviderService;
+import site.minnan.rental.application.provider.TenantProviderService;
+import site.minnan.rental.application.provider.UtilityProviderService;
 import site.minnan.rental.application.service.BillService;
 import site.minnan.rental.domain.aggregate.Bill;
+import site.minnan.rental.domain.aggregate.Room;
 import site.minnan.rental.domain.entity.BillDetails;
 import site.minnan.rental.domain.entity.BillTenantRelevance;
 import site.minnan.rental.domain.entity.JwtUser;
@@ -19,14 +28,13 @@ import site.minnan.rental.domain.vo.UtilityPrice;
 import site.minnan.rental.infrastructure.enumerate.BillStatus;
 import site.minnan.rental.infrastructure.enumerate.BillType;
 import site.minnan.rental.infrastructure.enumerate.PaymentMethod;
+import site.minnan.rental.infrastructure.enumerate.RoomStatus;
 import site.minnan.rental.infrastructure.utils.ReceiptUtils;
 import site.minnan.rental.userinterface.dto.CreateBillDTO;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,6 +59,9 @@ public class BillProviderServiceImpl implements BillProviderService {
 
     @Autowired
     private UtilityProviderService utilityProviderService;
+
+    @Autowired
+    private TenantProviderService tenantProviderService;
 
     /**
      * 房间由空闲转入在租状态时创建账单
@@ -84,7 +95,7 @@ public class BillProviderServiceImpl implements BillProviderService {
                 .payTime(new Timestamp(checkDate.getTime()))
                 .paymentMethod(PaymentMethod.valueOf(dto.getPayMethod()))
                 .utilityStartId(currentUtilityId)
-                .status(BillStatus.PAID)
+                .status(BillStatus.UNCONFIRMED)
                 .type(BillType.CHECK_IN)
                 .build();
         checkInBill.setCreateUser(dto.getUserId(), dto.getUserName(), new Timestamp(checkDate.getTime()));
@@ -111,16 +122,16 @@ public class BillProviderServiceImpl implements BillProviderService {
                         BillTenantRelevance.of(monthlyBill.getId(), e)))
                 .collect(Collectors.toList());
         billTenantRelevanceMapper.insertBatch(relevanceList);
-        BillDetails billDetails = billMapper.getBillDetails(checkInBill.getId());
-        try {
-            receiptUtils.generateReceipt(billDetails);
-            UpdateWrapper<Bill> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.set("receipt_url", billDetails.getReceiptUrl())
-                    .eq("id", billDetails.getId());
-            billMapper.update(null, updateWrapper);
-        } catch (IOException e) {
-            log.error("生成收据失败,id={}", billDetails.getId());
-        }
+//        BillDetails billDetails = billMapper.getBillDetails(checkInBill.getId());
+//        try {
+//            receiptUtils.generateReceipt(billDetails);
+//            UpdateWrapper<Bill> updateWrapper = new UpdateWrapper<>();
+//            updateWrapper.set("receipt_url", billDetails.getReceiptUrl())
+//                    .eq("id", billDetails.getId());
+//            billMapper.update(null, updateWrapper);
+//        } catch (IOException e) {
+//            log.error("生成收据失败,id={}", billDetails.getId());
+//        }
     }
 
     @Override
@@ -141,6 +152,60 @@ public class BillProviderServiceImpl implements BillProviderService {
             bill.surrenderCompleted(date);
             billMapper.settleBatch(Collections.singletonList(bill));
         }
+    }
 
+    /**
+     * 结束账单
+     *
+     * @param roomIds
+     */
+    @Override
+    public void completeBill(Collection<Integer> roomIds) {
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<BillDetails> billList = billMapper.getBillDetailsList(roomIds);
+        if (CollectionUtil.isNotEmpty(billList)) {
+            UtilityPrice price = billService.getUtilityPrice();
+            List<Room> roomInfoList = roomProviderService.getRoomInfoBatch(roomIds);
+            Map<Integer, Room> roomMap =
+                    roomInfoList.stream().collect(Collectors.toMap(Room::getId, e -> e));
+            List<Bill> newBillList = new ArrayList<>();
+            for (BillDetails bill : billList) {
+                bill.settleWater(price.getWaterPrice());
+                bill.settleElectricity(price.getElectricityPrice());
+                bill.setUpdateUser(jwtUser);
+                bill.unconfirmed();
+
+                Room roomInfo = roomMap.get(bill.getRoomId());
+                if(Objects.equals(roomInfo.getStatus(), RoomStatus.ON_RENT)){
+                    DateTime startDate = DateTime.of(bill.getEndDate());
+                    DateTime endDate =startDate.offsetNew(DateField.MONTH, 1);
+                    DateTime completeDate = DateTime.of(bill.getCompletedDate()).offsetNew(DateField.MONTH, 1);
+                    Bill newBill = Bill.builder()
+                            .year(startDate.year())
+                            .month(startDate.month())
+                            .houseId(roomInfo.getHouseId())
+                            .houseName(roomInfo.getHouseName())
+                            .roomId(roomInfo.getId())
+                            .roomNumber(roomInfo.getRoomNumber())
+                            .rent(roomInfo.getPrice())
+                            .completedDate(completeDate)
+                            .startDate(startDate)
+                            .endDate(endDate)
+                            .utilityStartId(bill.getUtilityEndId())
+                            .status(BillStatus.INIT)
+                            .type(BillType.MONTHLY)
+                            .build();
+                    newBillList.add(newBill);
+                }
+            }
+            billMapper.settleBatch(billList);
+            billMapper.insertBatch(newBillList);
+            Map<Integer, List<Integer>> tenantIdMap = tenantProviderService.getTenantIdByRoomId(roomIds);
+            List<BillTenantRelevance> relevanceList = newBillList.stream()
+                    .flatMap(e -> tenantIdMap.get(e.getRoomId()).stream().map(e1 -> BillTenantRelevance.of(e.getId(),
+                            e1)))
+                    .collect(Collectors.toList());
+            billTenantRelevanceMapper.insertBatch(relevanceList);
+        }
     }
 }

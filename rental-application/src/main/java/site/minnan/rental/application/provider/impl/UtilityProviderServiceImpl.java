@@ -1,9 +1,10 @@
-package site.minnan.rental.application.provider;
+package site.minnan.rental.application.provider.impl;
 
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import site.minnan.rental.application.provider.UtilityProviderService;
 import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.entity.JwtUser;
 import site.minnan.rental.domain.mapper.UtilityMapper;
@@ -70,6 +71,22 @@ public class UtilityProviderServiceImpl implements UtilityProviderService {
         queryWrapper.select("id").eq("room_id", roomId).eq("status", UtilityStatus.RECORDING);
         Utility utility = utilityMapper.selectOne(queryWrapper);
         return utility.getId();
+    }
+
+    /**
+     * 根据房间id获取当前水电行度
+     *
+     * @param houseId
+     * @return key:房间id，value：当前行度
+     */
+    @Override
+    public Map<Integer, Utility> getCurrentUtilityByHouse(Integer houseId) {
+        QueryWrapper<Utility> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("room_id", "water", "electricity")
+                .eq("status", UtilityStatus.RECORDING)
+                .eq("house_id", houseId);
+        List<Utility> utilityList = utilityMapper.selectList(queryWrapper);
+        return utilityList.stream().collect(Collectors.toMap(Utility::getRoomId, e -> e));
     }
 
     /**
