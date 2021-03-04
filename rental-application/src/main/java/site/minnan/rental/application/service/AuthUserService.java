@@ -1,9 +1,13 @@
 package site.minnan.rental.application.service;
 
-import site.minnan.rental.domain.vo.AuthUserVO;
+import site.minnan.rental.domain.vo.user.AuthUserVO;
 import site.minnan.rental.domain.vo.ListQueryVO;
 import site.minnan.rental.domain.vo.UserInfoVO;
 import site.minnan.rental.userinterface.dto.*;
+import site.minnan.rental.userinterface.dto.user.AddUserDTO;
+import site.minnan.rental.userinterface.dto.user.GetUserListDTO;
+import site.minnan.rental.userinterface.dto.user.UpdateUserDTO;
+import site.minnan.rental.userinterface.dto.user.UserEnabledDTO;
 
 /**
  * 用户管理service

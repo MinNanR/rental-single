@@ -1,8 +1,11 @@
 package site.minnan.rental.application.service;
 
 import site.minnan.rental.domain.vo.*;
+import site.minnan.rental.domain.vo.tenant.*;
 import site.minnan.rental.userinterface.dto.DetailsQueryDTO;
 import site.minnan.rental.userinterface.dto.*;
+import site.minnan.rental.userinterface.dto.room.AllSurrenderDTO;
+import site.minnan.rental.userinterface.dto.tenant.*;
 
 import java.util.List;
 
@@ -101,4 +104,10 @@ public interface TenantService {
      * @param dto
      */
     void checkIn(CheckInDTO dto);
+
+    /**
+     * 房客用户获取基本信息
+     * @return
+     */
+     TenantBaseInfoVO getTenantBaseInfo();
 }

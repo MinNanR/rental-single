@@ -5,7 +5,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aliyun.oss.OSS;
-import com.aliyun.oss.model.ObjectMetadata;
 import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.io.font.FontProgram;
@@ -30,7 +29,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import site.minnan.rental.application.service.BillService;
 import site.minnan.rental.domain.entity.BillDetails;
-import site.minnan.rental.domain.vo.UtilityPrice;
+import site.minnan.rental.domain.vo.utility.UtilityPrice;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

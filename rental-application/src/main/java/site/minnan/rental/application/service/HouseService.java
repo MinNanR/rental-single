@@ -1,13 +1,13 @@
 package site.minnan.rental.application.service;
 
-import site.minnan.rental.domain.vo.HouseDropDown;
-import site.minnan.rental.domain.vo.HouseInfoVO;
-import site.minnan.rental.domain.vo.HouseVO;
+import site.minnan.rental.domain.vo.house.HouseDropDown;
+import site.minnan.rental.domain.vo.house.HouseInfoVO;
+import site.minnan.rental.domain.vo.house.HouseVO;
 import site.minnan.rental.domain.vo.ListQueryVO;
-import site.minnan.rental.userinterface.dto.AddHouseDTO;
+import site.minnan.rental.userinterface.dto.house.AddHouseDTO;
 import site.minnan.rental.userinterface.dto.DetailsQueryDTO;
-import site.minnan.rental.userinterface.dto.GetHouseListDTO;
-import site.minnan.rental.userinterface.dto.UpdateHouseDTO;
+import site.minnan.rental.userinterface.dto.house.GetHouseListDTO;
+import site.minnan.rental.userinterface.dto.house.UpdateHouseDTO;
 
 import java.util.List;
 

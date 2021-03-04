@@ -5,6 +5,8 @@ import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mobile.device.Device;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,6 +18,7 @@ import site.minnan.rental.domain.aggregate.AuthUser;
 import site.minnan.rental.domain.entity.JwtUser;
 import site.minnan.rental.domain.mapper.UserMapper;
 import site.minnan.rental.domain.vo.LoginVO;
+import site.minnan.rental.infrastructure.enumerate.Role;
 import site.minnan.rental.infrastructure.utils.JwtUtil;
 import site.minnan.rental.infrastructure.utils.RedisUtil;
 
@@ -78,10 +81,18 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public LoginVO generateLoginVO(Authentication authentication) {
+    public LoginVO generateLoginVO(Authentication authentication, Device device) {
         JwtUser jwtUser = (JwtUser) authentication.getPrincipal();
         String token = jwtUtil.generateToken(jwtUser);
-        return new LoginVO(token);
+        String role = jwtUser.getRole();
+        if (device.isMobile()) {
+            return new LoginVO(token, role);
+        } else {
+            if (Role.TENANT.getValue().equals(role)) {
+                throw new AccessDeniedException("无权限访问");
+            }
+            return new LoginVO(token);
+        }
     }
 
     private Optional<AuthUser> getAuthUser(String username) {

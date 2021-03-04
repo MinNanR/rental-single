@@ -1,10 +1,15 @@
 package site.minnan.rental.application.service;
 
-import site.minnan.rental.domain.vo.BillInfoVO;
-import site.minnan.rental.domain.vo.BillVO;
+import site.minnan.rental.domain.vo.bill.BillInfoVO;
+import site.minnan.rental.domain.vo.bill.BillVO;
 import site.minnan.rental.domain.vo.ListQueryVO;
-import site.minnan.rental.domain.vo.UtilityPrice;
+import site.minnan.rental.domain.vo.utility.UtilityPrice;
 import site.minnan.rental.userinterface.dto.*;
+import site.minnan.rental.userinterface.dto.bill.BillPaidDTO;
+import site.minnan.rental.userinterface.dto.bill.GetBillListDTO;
+import site.minnan.rental.userinterface.dto.bill.GetBillsDTO;
+import site.minnan.rental.userinterface.dto.bill.SettleBillDTO;
+import site.minnan.rental.userinterface.dto.utility.SetUtilityPriceDTO;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -115,6 +120,14 @@ public interface BillService {
      * @param dto 房间id
      */
     void triggerSetBillUnconfirmed(DetailsQueryDTO dto);
+
+    /**
+     * 房客获取账单
+     *
+     * @param dto
+     * @return
+     */
+    ListQueryVO<BillVO> getTenantBillList(ListQueryDTO dto);
 
     /**
      * 到期账单结算

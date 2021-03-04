@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.minnan.rental.application.service.TenantService;
 import site.minnan.rental.domain.vo.*;
+import site.minnan.rental.domain.vo.tenant.*;
 import site.minnan.rental.userinterface.dto.*;
+import site.minnan.rental.userinterface.dto.room.AllSurrenderDTO;
+import site.minnan.rental.userinterface.dto.tenant.*;
 import site.minnan.rental.userinterface.response.ResponseEntity;
 
 import javax.validation.Valid;
@@ -108,6 +111,13 @@ public class TenantController {
     public ResponseEntity<?> checkIn(@RequestBody @Valid CheckInDTO dto){
         tenantService.checkIn(dto);
         return ResponseEntity.success();
+    }
+
+    @PreAuthorize("hasAnyAuthority('TENANT')")
+    @PostMapping("getBaseInfo")
+    public ResponseEntity<TenantBaseInfoVO> getBaseInfo(){
+        TenantBaseInfoVO vo = tenantService.getTenantBaseInfo();
+        return ResponseEntity.success(vo);
     }
 
 }

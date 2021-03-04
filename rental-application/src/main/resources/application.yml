@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://minnan.site:3306/rental?serverTimezone=Asia/Shanghai&allowMultiQueries=true
+    url: jdbc:mysql://minnan.site:3306/rental_test?serverTimezone=Asia/Shanghai&allowMultiQueries=true
     username: Minnan
     password: minnan
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -28,11 +28,11 @@ logging:
 mybatis-plus:
   mapper-locations: /site/minnan/rental/domain/mapper/*.xml
   configuration:
-#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
 
 aliyun:
   bucketName: link-server
   baseUrl: https://minnan.site:2005
-  receiptFolder: receipt
-  utilityFolder: utility
+  receiptFolder: receipt_test
+  utilityFolder: utility_test

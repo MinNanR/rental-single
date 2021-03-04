@@ -6,7 +6,6 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -23,16 +22,17 @@ import site.minnan.rental.application.provider.UtilityProviderService;
 import site.minnan.rental.application.service.BillService;
 import site.minnan.rental.domain.aggregate.Bill;
 import site.minnan.rental.domain.aggregate.Room;
+import site.minnan.rental.domain.aggregate.Tenant;
 import site.minnan.rental.domain.entity.BillDetails;
 import site.minnan.rental.domain.entity.BillTenantEntity;
 import site.minnan.rental.domain.entity.BillTenantRelevance;
 import site.minnan.rental.domain.entity.JwtUser;
 import site.minnan.rental.domain.mapper.BillMapper;
 import site.minnan.rental.domain.mapper.BillTenantRelevanceMapper;
-import site.minnan.rental.domain.vo.BillInfoVO;
-import site.minnan.rental.domain.vo.BillVO;
+import site.minnan.rental.domain.vo.bill.BillInfoVO;
+import site.minnan.rental.domain.vo.bill.BillVO;
 import site.minnan.rental.domain.vo.ListQueryVO;
-import site.minnan.rental.domain.vo.UtilityPrice;
+import site.minnan.rental.domain.vo.utility.UtilityPrice;
 import site.minnan.rental.infrastructure.enumerate.BillStatus;
 import site.minnan.rental.infrastructure.enumerate.BillType;
 import site.minnan.rental.infrastructure.enumerate.PaymentMethod;
@@ -42,6 +42,11 @@ import site.minnan.rental.infrastructure.exception.UnmodifiableException;
 import site.minnan.rental.infrastructure.utils.ReceiptUtils;
 import site.minnan.rental.infrastructure.utils.RedisUtil;
 import site.minnan.rental.userinterface.dto.*;
+import site.minnan.rental.userinterface.dto.bill.BillPaidDTO;
+import site.minnan.rental.userinterface.dto.bill.GetBillListDTO;
+import site.minnan.rental.userinterface.dto.bill.GetBillsDTO;
+import site.minnan.rental.userinterface.dto.bill.SettleBillDTO;
+import site.minnan.rental.userinterface.dto.utility.SetUtilityPriceDTO;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -466,6 +471,29 @@ public class BillServiceImpl implements BillService {
             }
         } else {
             throw new UnmodifiableException("当前房间未到结算日");
+        }
+    }
+
+    /**
+     * 房客获取账单
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public ListQueryVO<BillVO> getTenantBillList(ListQueryDTO dto) {
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Tenant tenant = tenantProviderService.getTenantByUserId(jwtUser.getId());
+        Integer count = billMapper.countBillByTenant(tenant.getId());
+        if(count > 0){
+            Integer pageIndex = dto.getPageIndex();
+            Integer pageSize = dto.getPageSize();
+            Integer start = (pageIndex - 1) * pageSize;
+            List<Bill> billList = billMapper.getBillListByTenant(tenant.getId(), start, pageSize);
+            List<BillVO> list = billList.stream().map(BillVO::of).collect(Collectors.toList());
+            return new ListQueryVO<>(list, (long) count);
+        }else{
+            return new ListQueryVO<>(ListUtil.empty(), 0L);
         }
     }
 }

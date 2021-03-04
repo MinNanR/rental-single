@@ -8,8 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.minnan.rental.application.service.RoomService;
 import site.minnan.rental.domain.vo.*;
+import site.minnan.rental.domain.vo.room.*;
+import site.minnan.rental.domain.vo.utility.UtilityInitVO;
 import site.minnan.rental.infrastructure.enumerate.RoomStatus;
 import site.minnan.rental.userinterface.dto.*;
+import site.minnan.rental.userinterface.dto.room.*;
 import site.minnan.rental.userinterface.response.ResponseEntity;
 
 import javax.validation.Valid;

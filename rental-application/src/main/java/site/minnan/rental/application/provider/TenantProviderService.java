@@ -2,6 +2,7 @@ package site.minnan.rental.application.provider;
 
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import site.minnan.rental.domain.aggregate.Tenant;
 
 import java.util.Collection;
 import java.util.List;
@@ -41,4 +42,11 @@ public interface TenantProviderService {
      * @return
      */
     JSONArray getTenantByIds(List<Integer> ids);
+
+    /**
+     * 根据房客id获取房客对象
+     * @param id
+     * @return
+     */
+    Tenant getTenantByUserId(Integer id);
 }

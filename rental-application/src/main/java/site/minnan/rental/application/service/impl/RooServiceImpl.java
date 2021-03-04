@@ -15,9 +15,15 @@ import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.entity.JwtUser;
 import site.minnan.rental.domain.mapper.RoomMapper;
 import site.minnan.rental.domain.vo.*;
+import site.minnan.rental.domain.vo.room.FloorDropDown;
+import site.minnan.rental.domain.vo.room.FloorVO;
+import site.minnan.rental.domain.vo.room.RoomInfoVO;
+import site.minnan.rental.domain.vo.room.RoomVO;
+import site.minnan.rental.domain.vo.utility.UtilityInitVO;
 import site.minnan.rental.infrastructure.enumerate.RoomStatus;
 import site.minnan.rental.infrastructure.exception.EntityNotExistException;
 import site.minnan.rental.userinterface.dto.*;
+import site.minnan.rental.userinterface.dto.room.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;

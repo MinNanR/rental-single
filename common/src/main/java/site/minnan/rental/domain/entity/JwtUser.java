@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * JWT实体类
@@ -56,6 +57,11 @@ public class JwtUser implements UserDetails {
      */
     private String passwordStamp;
 
+    /**
+     * 租客id
+     */
+    private Integer tenantId;
+
 
     /**
      * Indicates whether the user's account has expired. An expired account cannot be
@@ -103,5 +109,7 @@ public class JwtUser implements UserDetails {
         return enabled;
     }
 
-
+    public String getRole(){
+        return authorities.stream().map(GrantedAuthority::getAuthority).findFirst().orElse("");
+    }
 }

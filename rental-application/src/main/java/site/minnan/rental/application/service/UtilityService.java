@@ -1,16 +1,14 @@
 package site.minnan.rental.application.service;
 
-import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.vo.ListQueryVO;
-import site.minnan.rental.domain.vo.UtilityFileVO;
-import site.minnan.rental.domain.vo.UtilityRecordVO;
-import site.minnan.rental.domain.vo.UtilityVO;
-import site.minnan.rental.userinterface.dto.AddUtilityDTO;
-import site.minnan.rental.userinterface.dto.GetRecordListDTO;
-import site.minnan.rental.userinterface.dto.GetUtilityDTO;
-import site.minnan.rental.userinterface.dto.UpdateUtilityDTO;
+import site.minnan.rental.domain.vo.utility.UtilityFileVO;
+import site.minnan.rental.domain.vo.utility.UtilityRecordVO;
+import site.minnan.rental.domain.vo.utility.UtilityVO;
+import site.minnan.rental.userinterface.dto.utility.AddUtilityDTO;
+import site.minnan.rental.userinterface.dto.utility.GetRecordListDTO;
+import site.minnan.rental.userinterface.dto.utility.GetUtilityDTO;
+import site.minnan.rental.userinterface.dto.utility.UpdateUtilityDTO;
 
-import java.io.IOException;
 import java.util.List;
 
 public interface UtilityService {

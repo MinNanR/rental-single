@@ -5,7 +5,6 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.IdcardUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.pinyin.PinyinEngine;
-import cn.hutool.extra.pinyin.PinyinUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -17,17 +16,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.minnan.rental.application.provider.BillProviderService;
 import site.minnan.rental.application.provider.RoomProviderService;
+import site.minnan.rental.application.provider.TenantProviderService;
 import site.minnan.rental.application.service.TenantService;
 import site.minnan.rental.domain.aggregate.Tenant;
 import site.minnan.rental.domain.entity.JwtUser;
 import site.minnan.rental.domain.mapper.TenantMapper;
 import site.minnan.rental.domain.vo.*;
+import site.minnan.rental.domain.vo.tenant.*;
 import site.minnan.rental.infrastructure.enumerate.Gender;
 import site.minnan.rental.infrastructure.enumerate.RoomStatus;
 import site.minnan.rental.infrastructure.enumerate.TenantStatus;
 import site.minnan.rental.infrastructure.exception.EntityNotExistException;
 import site.minnan.rental.infrastructure.utils.RedisUtil;
 import site.minnan.rental.userinterface.dto.*;
+import site.minnan.rental.userinterface.dto.room.AllSurrenderDTO;
+import site.minnan.rental.userinterface.dto.tenant.*;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -46,6 +49,8 @@ public class TenantServiceImpl implements TenantService {
     @Autowired
     private PinyinEngine pinyinEngine;
 
+    @Autowired
+    private TenantProviderService tenantProviderService;
 
 //    @Reference(check = false)
 //    private UserProviderService userProviderService;
@@ -469,6 +474,27 @@ public class TenantServiceImpl implements TenantService {
                 .build();
         billProviderService.createBill(createBillDTO);
     }
+
+    /**
+     * 房客用户获取基本信息
+     *
+     * @return
+     */
+    @Override
+    public TenantBaseInfoVO getTenantBaseInfo() {
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Tenant tenant = tenantProviderService.getTenantByUserId(jwtUser.getId());
+        String name = tenant.getName();
+        TenantBaseInfoVO vo;
+        if(StrUtil.isNotBlank(name)){
+            char firstLetter = pinyinEngine.getFirstLetter(name.charAt(0));
+            vo = new TenantBaseInfoVO(tenant, String.valueOf(firstLetter).toUpperCase());
+        }else{
+            vo = new TenantBaseInfoVO(tenant, "");
+        }
+        return vo;
+    }
+
 
     /**
      * 添加房客

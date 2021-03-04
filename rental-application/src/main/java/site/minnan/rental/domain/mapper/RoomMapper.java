@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 import site.minnan.rental.domain.aggregate.Room;
 import site.minnan.rental.domain.vo.RoomDropDown;
-import site.minnan.rental.domain.vo.UtilityInitVO;
+import site.minnan.rental.domain.vo.utility.UtilityInitVO;
 
 import java.util.List;
 

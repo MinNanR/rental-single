@@ -6,12 +6,12 @@
     <!--批量添加用户-->
     <insert id="addUserBatch" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
         insert into auth_user(username, password, role, enabled, real_name, phone, create_user_id, create_user_name,
-                       create_time, update_user_id, update_user_name, update_time)
+                       create_time, update_user_id, update_user_name, update_time, password_stamp)
         values
         <foreach collection="list" separator="," item="item">
             (#{item.username}, #{item.password}, #{item.role}, #{item.enabled}, #{item.realName}, #{item.phone},
             #{item.createUserId}, #{item.createUserName}, #{item.createTime}, #{item.updateUserId},
-            #{item.updateUserName}, #{item.updateTime})
+            #{item.updateUserName}, #{item.updateTime}, #{item.passwordStamp})
         </foreach>
     </insert>
 </mapper>

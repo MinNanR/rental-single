@@ -21,6 +21,7 @@ import java.util.Date;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @TableName("rental_tenant")
+@ToString
 public class Tenant {
 
     @TableId(type = IdType.AUTO)

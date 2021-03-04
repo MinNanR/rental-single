@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.minnan.rental.domain.entity.JwtUser;
 import site.minnan.rental.infrastructure.enumerate.UtilityStatus;
-import site.minnan.rental.userinterface.dto.AddUtilityDTO;
+import site.minnan.rental.userinterface.dto.utility.AddUtilityDTO;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;

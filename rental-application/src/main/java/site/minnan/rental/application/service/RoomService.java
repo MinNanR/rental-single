@@ -1,7 +1,13 @@
 package site.minnan.rental.application.service;
 
 import site.minnan.rental.domain.vo.*;
+import site.minnan.rental.domain.vo.room.FloorDropDown;
+import site.minnan.rental.domain.vo.room.FloorVO;
+import site.minnan.rental.domain.vo.room.RoomInfoVO;
+import site.minnan.rental.domain.vo.room.RoomVO;
+import site.minnan.rental.domain.vo.utility.UtilityInitVO;
 import site.minnan.rental.userinterface.dto.*;
+import site.minnan.rental.userinterface.dto.room.*;
 
 import java.util.Collection;
 import java.util.List;

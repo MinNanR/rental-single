@@ -6,10 +6,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import site.minnan.rental.application.service.AuthUserService;
-import site.minnan.rental.domain.vo.AuthUserVO;
+import site.minnan.rental.domain.vo.user.AuthUserVO;
 import site.minnan.rental.domain.vo.ListQueryVO;
 import site.minnan.rental.domain.vo.UserInfoVO;
 import site.minnan.rental.userinterface.dto.*;
+import site.minnan.rental.userinterface.dto.user.AddUserDTO;
+import site.minnan.rental.userinterface.dto.user.GetUserListDTO;
+import site.minnan.rental.userinterface.dto.user.UpdateUserDTO;
+import site.minnan.rental.userinterface.dto.user.UserEnabledDTO;
 import site.minnan.rental.userinterface.response.ResponseEntity;
 
 import javax.validation.Valid;

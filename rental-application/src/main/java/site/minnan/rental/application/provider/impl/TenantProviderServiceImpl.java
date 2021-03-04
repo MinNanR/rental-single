@@ -4,6 +4,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import site.minnan.rental.application.provider.TenantProviderService;
 import site.minnan.rental.domain.aggregate.Tenant;
@@ -76,5 +77,19 @@ public class TenantProviderServiceImpl implements TenantProviderService {
                 .in("id", ids);
         List<Tenant> tenantList = tenantMapper.selectList(queryWrapper);
         return tenantList.stream().map(JSONObject::new).collect(JSONArray::new, JSONArray::add, JSONArray::addAll);
+    }
+
+    /**
+     * 根据房客id获取房客对象
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    @Cacheable("tenant")
+    public Tenant getTenantByUserId(Integer id) {
+        QueryWrapper<Tenant> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", id);
+        return tenantMapper.selectOne(queryWrapper);
     }
 }

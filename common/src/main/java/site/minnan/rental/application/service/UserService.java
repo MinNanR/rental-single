@@ -1,5 +1,6 @@
 package site.minnan.rental.application.service;
 
+import org.springframework.mobile.device.Device;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import site.minnan.rental.domain.vo.LoginVO;
@@ -15,5 +16,5 @@ public interface UserService extends UserDetailsService {
      * @param authentication
      * @return
      */
-    LoginVO generateLoginVO(Authentication authentication);
+    LoginVO generateLoginVO(Authentication authentication, Device device);
 }
