@@ -1,14 +1,12 @@
 package site.minnan.rental.application.service;
 
+import site.minnan.rental.domain.vo.bill.BillData;
 import site.minnan.rental.domain.vo.bill.BillInfoVO;
 import site.minnan.rental.domain.vo.bill.BillVO;
 import site.minnan.rental.domain.vo.ListQueryVO;
 import site.minnan.rental.domain.vo.utility.UtilityPrice;
 import site.minnan.rental.userinterface.dto.*;
-import site.minnan.rental.userinterface.dto.bill.BillPaidDTO;
-import site.minnan.rental.userinterface.dto.bill.GetBillListDTO;
-import site.minnan.rental.userinterface.dto.bill.GetBillsDTO;
-import site.minnan.rental.userinterface.dto.bill.SettleBillDTO;
+import site.minnan.rental.userinterface.dto.bill.*;
 import site.minnan.rental.userinterface.dto.utility.SetUtilityPriceDTO;
 
 import java.io.IOException;
@@ -133,4 +131,11 @@ public interface BillService {
      * 到期账单结算
      */
     void setBillUnconfirmed();
+
+    /**
+     * 获取填写月度账单时所需要的数据
+     *
+     * @param dto
+     */
+    BillData getBillData(GetBillDataDTO dto);
 }

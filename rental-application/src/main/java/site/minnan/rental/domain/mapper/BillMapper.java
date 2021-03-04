@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import site.minnan.rental.domain.aggregate.Bill;
 import site.minnan.rental.domain.entity.BillDetails;
 import site.minnan.rental.domain.entity.BillTenantEntity;
+import site.minnan.rental.domain.vo.bill.BillData;
 import site.minnan.rental.infrastructure.enumerate.BillStatus;
 import site.minnan.rental.infrastructure.enumerate.BillType;
 
@@ -98,4 +99,11 @@ public interface BillMapper extends BaseMapper<Bill> {
     @Select("select count(1) from rental_bill t1 left join rental_bill_tenant_relevance t2 on t1.id = t2.bill_id " +
             "where t2.tenant_id = #{tenantId} and (t1.status = 'UNPAID' or t1.status = 'PAID')")
     Integer countBillByTenant(@Param("tenantId") Integer tenantId);
+
+    @Select("select t1.price price,t3.water waterStart,t3.electricity electricityStart,t3.create_time utilityStartDate,t3.id utilityStartId " +
+            "from rental_room t1 " +
+            "left join rental_bill t2 on t1.id = t2.room_id and t2.status = 'INIT' " +
+            "left join rental_utility t3 on t2.utility_start_id = t3.id and t3.status = 'RECORDING' " +
+            "where t1.id = #{roomId}")
+    BillData getBillData(@Param("roomId")Integer roomId);
 }

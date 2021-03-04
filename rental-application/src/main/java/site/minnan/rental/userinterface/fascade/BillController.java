@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import site.minnan.rental.application.service.BillService;
 import site.minnan.rental.domain.vo.*;
+import site.minnan.rental.domain.vo.bill.BillData;
 import site.minnan.rental.domain.vo.bill.BillInfoVO;
 import site.minnan.rental.domain.vo.bill.BillStatusDropDown;
 import site.minnan.rental.domain.vo.bill.BillVO;
@@ -15,10 +16,7 @@ import site.minnan.rental.domain.vo.utility.UtilityPrice;
 import site.minnan.rental.infrastructure.enumerate.BillStatus;
 import site.minnan.rental.infrastructure.enumerate.UtilityStatus;
 import site.minnan.rental.userinterface.dto.*;
-import site.minnan.rental.userinterface.dto.bill.BillPaidDTO;
-import site.minnan.rental.userinterface.dto.bill.GetBillListDTO;
-import site.minnan.rental.userinterface.dto.bill.GetBillsDTO;
-import site.minnan.rental.userinterface.dto.bill.SettleBillDTO;
+import site.minnan.rental.userinterface.dto.bill.*;
 import site.minnan.rental.userinterface.dto.utility.SetUtilityPriceDTO;
 import site.minnan.rental.userinterface.response.ResponseEntity;
 
@@ -171,6 +169,13 @@ public class BillController {
     @PostMapping("getTenantBill")
     public ResponseEntity<?> getTenantBill(@RequestBody @Valid ListQueryDTO dto){
         ListQueryVO<BillVO> vo = billService.getTenantBillList(dto);
+        return ResponseEntity.success(vo);
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN','LANDLORD')")
+    @PostMapping("getBillData")
+    public ResponseEntity<BillData> getBillData(@RequestBody @Valid GetBillDataDTO dto){
+        BillData vo = billService.getBillData(dto);
         return ResponseEntity.success(vo);
     }
 }
