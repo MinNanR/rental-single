@@ -1,11 +1,13 @@
 package site.minnan.rental.userinterface.dto.utility;
 
+import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 @Data
+@Builder
 public class AddUtilityDTO {
 
     @NotNull(message = "未指定房间")

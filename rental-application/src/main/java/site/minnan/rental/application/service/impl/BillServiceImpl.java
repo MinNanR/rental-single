@@ -23,6 +23,7 @@ import site.minnan.rental.application.service.BillService;
 import site.minnan.rental.domain.aggregate.Bill;
 import site.minnan.rental.domain.aggregate.Room;
 import site.minnan.rental.domain.aggregate.Tenant;
+import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.entity.BillDetails;
 import site.minnan.rental.domain.entity.BillTenantEntity;
 import site.minnan.rental.domain.entity.BillTenantRelevance;
@@ -44,6 +45,7 @@ import site.minnan.rental.infrastructure.utils.ReceiptUtils;
 import site.minnan.rental.infrastructure.utils.RedisUtil;
 import site.minnan.rental.userinterface.dto.*;
 import site.minnan.rental.userinterface.dto.bill.*;
+import site.minnan.rental.userinterface.dto.utility.AddUtilityDTO;
 import site.minnan.rental.userinterface.dto.utility.SetUtilityPriceDTO;
 
 import java.io.IOException;
@@ -507,5 +509,65 @@ public class BillServiceImpl implements BillService {
         billData.setWaterPrice(utilityPrice.getWaterPrice().intValue());
         billData.setElectricityPrice(utilityPrice.getElectricityPrice().intValue());
         return billData;
+    }
+
+    /**
+     * 添加月度账单
+     *
+     * @param dto
+     */
+    @Override
+    @Transactional
+    public void fillMonthlyBill(FillBillDTO dto) {
+        //水电开始度数
+        utilityProviderService.getOrUpdateUtility(dto.getUtilityStartId(),
+                dto.getWaterStart(), dto.getWaterEnd());
+        BillDetails bill = billMapper.getBillDetails(dto.getBillId());
+
+        //添加水电记录
+        AddUtilityDTO addUtilityDTO = AddUtilityDTO.builder()
+                .houseId(bill.getHouseId())
+                .houseName(bill.getHouseName())
+                .roomId(bill.getRoomId())
+                .roomNumber(bill.getRoomNumber())
+                .water(dto.getWaterEnd())
+                .electricity(dto.getElectricityEnd())
+                .build();
+        Utility utilityEnd = utilityProviderService.addUtility(addUtilityDTO);
+        bill.setUtilityEndId(utilityEnd.getId());
+        bill.setWaterEnd(utilityEnd.getWater());
+        bill.setElectricityEnd(utilityEnd.getElectricity());
+        UtilityPrice price = getUtilityPrice();
+        bill.settleWater(price.getWaterPrice());
+        bill.settleElectricity(price.getElectricityPrice());
+        bill.setStartDate(DateUtil.parseDate(dto.getStartDate()));
+        bill.setEndDate(DateUtil.parseDate(dto.getEndDate()));
+        bill.unpaid();
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        bill.setUpdateUser(jwtUser);
+        try {
+            receiptUtils.generateReceipt(bill);
+        } catch (IOException e) {
+            log.error("生成账单IO异常id={}", bill.getId());
+        }
+        billMapper.updateById(bill);
+
+        JSONObject room = roomProviderService.getRoomInfo(bill.getRoomId());
+        DateTime startDate = DateTime.of(bill.getEndDate());
+        DateTime endDate = startDate.offsetNew(DateField.MONTH, 1);
+        Bill newBill = Bill.builder()
+                .houseId(bill.getHouseId())
+                .houseName(bill.getHouseName())
+                .roomId(bill.getRoomId())
+                .roomNumber(bill.getRoomNumber())
+                .rent(room.getInt("price"))
+                .utilityStartId(bill.getUtilityEndId())
+                .status(BillStatus.INIT)
+                .startDate(startDate)
+                .endDate(endDate)
+                .type(BillType.MONTHLY)
+                .build();
+        newBill.setCreateUser(jwtUser.getId(), jwtUser.getRealName(), new Timestamp(System.currentTimeMillis()));
+        billMapper.insert(newBill);
     }
 }

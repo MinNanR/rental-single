@@ -138,4 +138,11 @@ public interface BillService {
      * @param dto
      */
     BillData getBillData(GetBillDataDTO dto);
+
+    /**
+     * 添加月度账单
+     *
+     * @param dto
+     */
+    void fillMonthlyBill(FillBillDTO dto);
 }

@@ -4,7 +4,9 @@ import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.vo.SettleQueryVO;
 import site.minnan.rental.userinterface.dto.NewRoomUtilityDTO;
 import site.minnan.rental.userinterface.dto.SettleQueryDTO;
+import site.minnan.rental.userinterface.dto.utility.AddUtilityDTO;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -15,13 +17,6 @@ import java.util.Map;
  */
 public interface UtilityProviderService {
 
-    /**
-     * 查询水电
-     *
-     * @param dtoList
-     * @return key:房间id，value：开始的水电情况和结束的水电情况
-     */
-    Map<Integer, SettleQueryVO> getUtility(List<SettleQueryDTO> dtoList);
 
     /**
      * 获取房间当前水电度数记录id
@@ -40,12 +35,22 @@ public interface UtilityProviderService {
     Map<Integer, Utility> getCurrentUtilityByHouse(Integer houseId);
 
     /**
-     * 查询水电
+     * 获取水电记录，获取前检查是否需要修改
+     *
+     * @param utilityId   水电记录id
+     * @param water       水表行度
+     * @param electricity 电表行度
+     * @return
+     */
+    Utility getOrUpdateUtility(Integer utilityId, BigDecimal water, BigDecimal electricity);
+
+    /**
+     * 添加水电记录
      *
      * @param dto
      * @return
      */
-    SettleQueryVO getUtility(SettleQueryDTO dto);
+    Utility addUtility(AddUtilityDTO dto);
 
     /**
      * 添加房间时添加水电记录
@@ -53,4 +58,11 @@ public interface UtilityProviderService {
      * @param dto
      */
     void addUtility(NewRoomUtilityDTO dto);
+
+    /**
+     * 登记入住时登记水电
+     *
+     * @param dto
+     */
+    void updateUtility(AddUtilityDTO dto);
 }

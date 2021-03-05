@@ -1,6 +1,10 @@
 package site.minnan.rental.domain.vo.bill;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+
+import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * 填写月度账单时所需要的数据
@@ -8,6 +12,8 @@ import lombok.Data;
  */
 @Data
 public class BillData {
+
+    private Integer id;
 
     private Integer waterPrice;
 
@@ -19,7 +25,14 @@ public class BillData {
 
     private Integer price;
 
-    private String utilityStartDate;
+    @JsonFormat(pattern = "M月dd日")
+    private Timestamp utilityStartDate;
 
     private String utilityStartId;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date startDate;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date endDate;
 }

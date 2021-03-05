@@ -1,24 +1,25 @@
 package site.minnan.rental.application.provider.impl;
 
-import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import site.minnan.rental.application.provider.UtilityProviderService;
+import site.minnan.rental.application.service.UtilityService;
 import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.entity.JwtUser;
 import site.minnan.rental.domain.mapper.UtilityMapper;
-import site.minnan.rental.domain.vo.SettleQueryVO;
 import site.minnan.rental.infrastructure.enumerate.UtilityStatus;
 import site.minnan.rental.userinterface.dto.NewRoomUtilityDTO;
-import site.minnan.rental.userinterface.dto.SettleQueryDTO;
+import site.minnan.rental.userinterface.dto.utility.AddUtilityDTO;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class UtilityProviderServiceImpl implements UtilityProviderService {
@@ -26,38 +27,8 @@ public class UtilityProviderServiceImpl implements UtilityProviderService {
     @Autowired
     private UtilityMapper utilityMapper;
 
-
-    /**
-     * 查询水电
-     *
-     * @param dtoList
-     * @return
-     */
-    @Override
-    public Map<Integer, SettleQueryVO> getUtility(List<SettleQueryDTO> dtoList) {
-        //结算时使用的水电单
-        QueryWrapper<Utility> endQueryWrapper = new QueryWrapper<>();
-        List<Integer> roomIds = dtoList.stream().map(SettleQueryDTO::getRoomId).collect(Collectors.toList());
-        endQueryWrapper.select("id", "room_id", "water", "electricity", "create_time")
-                .eq("status", UtilityStatus.RECORDING)
-                .in("room_id", roomIds);
-        List<Utility> endUtilityList = utilityMapper.selectList(endQueryWrapper);
-        //账单开始时使用的水电单
-        QueryWrapper<Utility> startQueryWrapper = new QueryWrapper<>();
-        List<Integer> utilityIds = dtoList.stream().map(SettleQueryDTO::getStartUtilityId).collect(Collectors.toList());
-        startQueryWrapper.select("id", "room_id", "water", "electricity", "create_time")
-                .in("id", utilityIds);
-        List<Utility> startUtilityList = utilityMapper.selectList(startQueryWrapper);
-        return Stream.concat(endUtilityList.stream(), startUtilityList.stream())
-                .collect(Collectors.groupingBy(Utility::getRoomId, Collectors.collectingAndThen(Collectors.toList(),
-                        (e -> {
-                            e.sort(Comparator.comparing(Utility::getCreateTime));
-                            Utility start = e.get(0);
-                            Utility end = e.get(1);
-                            return new SettleQueryVO(new JSONObject(start), new JSONObject(end));
-                        }))));
-
-    }
+    @Autowired
+    private UtilityService utilityService;
 
     /**
      * 获取房间当前水电度数记录id
@@ -67,7 +38,8 @@ public class UtilityProviderServiceImpl implements UtilityProviderService {
      */
     @Override
     public Integer getCurrentUtility(Integer roomId) {
-        QueryWrapper<Utility> queryWrapper = new QueryWrapper<>();;
+        QueryWrapper<Utility> queryWrapper = new QueryWrapper<>();
+        ;
         queryWrapper.select("id").eq("room_id", roomId).eq("status", UtilityStatus.RECORDING);
         Utility utility = utilityMapper.selectOne(queryWrapper);
         return utility.getId();
@@ -89,25 +61,6 @@ public class UtilityProviderServiceImpl implements UtilityProviderService {
         return utilityList.stream().collect(Collectors.toMap(Utility::getRoomId, e -> e));
     }
 
-    /**
-     * 查询水电
-     *
-     * @param dto
-     * @return
-     */
-    @Override
-    public SettleQueryVO getUtility(SettleQueryDTO dto) {
-        QueryWrapper<Utility> endQueryWrapper = new QueryWrapper<>();
-        endQueryWrapper.select("id", "room_id", "water", "electricity", "create_time")
-                .eq("status", UtilityStatus.RECORDING)
-                .in("room_id", dto.getRoomId());
-        Utility end = utilityMapper.selectOne(endQueryWrapper);
-        QueryWrapper<Utility> startQueryWrapper = new QueryWrapper<>();
-        startQueryWrapper.select("id", "room_id", "water", "electricity", "create_time")
-                .eq("id", dto.getStartUtilityId());
-        Utility start = utilityMapper.selectOne(startQueryWrapper);
-        return new SettleQueryVO(new JSONObject(start), new JSONObject(end));
-    }
 
     @Override
     public void addUtility(NewRoomUtilityDTO dto) {
@@ -129,6 +82,50 @@ public class UtilityProviderServiceImpl implements UtilityProviderService {
                 .updateTime(current)
                 .build();
         utilityMapper.insert(utility);
+    }
 
+    /**
+     * 获取水电记录，获取前检查是否需要修改
+     *
+     * @param utilityId   水电记录id
+     * @param water       水表行度
+     * @param electricity 电表行度
+     * @return
+     */
+    @Override
+    @Transactional
+    public Utility getOrUpdateUtility(Integer utilityId, BigDecimal water, BigDecimal electricity) {
+        Utility utility = utilityMapper.selectById(utilityId);
+        if (utility.getWater().compareTo(water) != 0 ||
+                utility.getElectricity().compareTo(electricity) != 0) {
+            JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            utility.setWater(water);
+            utility.setElectricity(electricity);
+            utility.setUpdateUser(jwtUser);
+            utilityMapper.updateById(utility);
+        }
+        return utility;
+    }
+
+    @Override
+    @Transactional
+    public Utility addUtility(AddUtilityDTO dto) {
+        return utilityService.addUtility(dto);
+    }
+
+    /**
+     * 登记入住时登记水电
+     *
+     * @param dto
+     */
+    @Override
+    public void updateUtility(AddUtilityDTO dto) {
+        QueryWrapper<Utility> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("room_id", dto.getRoomId())
+                .eq("status", UtilityStatus.RECORDING);
+        Utility utility = utilityMapper.selectOne(queryWrapper);
+        Optional.ofNullable(dto.getWater()).ifPresent(utility::setWater);
+        Optional.ofNullable(dto.getElectricity()).ifPresent(utility::setElectricity);
+        utilityMapper.updateById(utility);
     }
 }

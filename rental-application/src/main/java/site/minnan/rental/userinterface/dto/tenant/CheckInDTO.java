@@ -2,6 +2,7 @@ package site.minnan.rental.userinterface.dto.tenant;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -28,6 +29,10 @@ public class CheckInDTO {
     private String payMethod;
 
     private String remark;
+
+    private BigDecimal water;
+
+    private BigDecimal electricity;
 
     List<AddTenantDTO> tenantList;
 }

@@ -142,11 +142,13 @@ public class Bill {
     /**
      * 账单开始时间
      */
+    @Setter
     private Date startDate;
 
     /**
      * 账单结束时间
      */
+    @Setter
     private Date endDate;
 
     /**
@@ -257,6 +259,10 @@ public class Bill {
 
     public void unconfirmed() {
         this.status = BillStatus.UNCONFIRMED;
+    }
+
+    public void unpaid(){
+        this.status = BillStatus.UNPAID;
     }
 
     public void surrenderCompleted(Date time) {

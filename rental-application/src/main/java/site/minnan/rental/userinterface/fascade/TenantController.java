@@ -1,5 +1,6 @@
 package site.minnan.rental.userinterface.fascade;
 
+import cn.hutool.core.lang.Console;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;

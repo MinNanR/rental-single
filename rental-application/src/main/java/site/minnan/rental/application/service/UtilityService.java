@@ -1,5 +1,6 @@
 package site.minnan.rental.application.service;
 
+import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.vo.ListQueryVO;
 import site.minnan.rental.domain.vo.utility.UtilityFileVO;
 import site.minnan.rental.domain.vo.utility.UtilityRecordVO;
@@ -24,7 +25,7 @@ public interface UtilityService {
      * 登记水电（单个房间）
      * @param dto
      */
-    void addUtility(AddUtilityDTO dto);
+    Utility addUtility(AddUtilityDTO dto);
 
     /**
      * 修改水电记录

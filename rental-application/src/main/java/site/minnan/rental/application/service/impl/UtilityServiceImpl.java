@@ -105,7 +105,7 @@ public class UtilityServiceImpl implements UtilityService {
      */
     @Override
     @Transactional
-    public void addUtility(AddUtilityDTO dto) {
+    public Utility addUtility(AddUtilityDTO dto) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         beforeRecord(dto);
         Utility utility = Utility.assemble(dto);
@@ -116,7 +116,8 @@ public class UtilityServiceImpl implements UtilityService {
                 .set("status", UtilityStatus.RECORDED);
         utilityMapper.update(null, updateWrapper);
         utilityMapper.insert(utility);
-        billProviderService.completeBill(Collections.singletonList(dto.getRoomId()));
+//        billProviderService.completeBill(Collections.singletonList(dto.getRoomId()));
+        return utility;
     }
 
     /**

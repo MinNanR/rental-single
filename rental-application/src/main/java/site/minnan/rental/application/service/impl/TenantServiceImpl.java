@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import site.minnan.rental.application.provider.BillProviderService;
 import site.minnan.rental.application.provider.RoomProviderService;
 import site.minnan.rental.application.provider.TenantProviderService;
+import site.minnan.rental.application.provider.UtilityProviderService;
 import site.minnan.rental.application.service.TenantService;
 import site.minnan.rental.domain.aggregate.Tenant;
 import site.minnan.rental.domain.entity.JwtUser;
@@ -31,6 +32,7 @@ import site.minnan.rental.infrastructure.utils.RedisUtil;
 import site.minnan.rental.userinterface.dto.*;
 import site.minnan.rental.userinterface.dto.room.AllSurrenderDTO;
 import site.minnan.rental.userinterface.dto.tenant.*;
+import site.minnan.rental.userinterface.dto.utility.AddUtilityDTO;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -60,6 +62,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Autowired
     private BillProviderService billProviderService;
+
+    @Autowired
+    private UtilityProviderService utilityProviderService;
 
     /**
      * 添加房客
@@ -458,6 +463,14 @@ public class TenantServiceImpl implements TenantService {
                 .userName(jwtUser.getRealName())
                 .build();
         roomProviderService.updateRoomStatus(updateRoomStatusDTO);
+
+        if (dto.getWater() != null || dto.getElectricity()!=null) {
+            AddUtilityDTO addUtilityDTO = AddUtilityDTO.builder()
+                    .water(dto.getWater())
+                    .electricity(dto.getElectricity())
+                    .build();
+            utilityProviderService.updateUtility(addUtilityDTO);
+        }
 
         //添加账单
         List<Integer> tenantIdList = newTenantList.stream().map(Tenant::getId).collect(Collectors.toList());

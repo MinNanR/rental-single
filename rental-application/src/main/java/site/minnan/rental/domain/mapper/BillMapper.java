@@ -100,8 +100,8 @@ public interface BillMapper extends BaseMapper<Bill> {
             "where t2.tenant_id = #{tenantId} and (t1.status = 'UNPAID' or t1.status = 'PAID')")
     Integer countBillByTenant(@Param("tenantId") Integer tenantId);
 
-    @Select("select t1.price price,t3.water waterStart,t3.electricity electricityStart,t3.create_time utilityStartDate,t3.id utilityStartId " +
-            "from rental_room t1 " +
+    @Select("select t2.id id, t1.price price,t3.water waterStart,t3.electricity electricityStart,t3.create_time " +
+            "utilityStartDate,t3.id utilityStartId ,t2.start_date startDate, t2.end_date endDate from rental_room t1 " +
             "left join rental_bill t2 on t1.id = t2.room_id and t2.status = 'INIT' " +
             "left join rental_utility t3 on t2.utility_start_id = t3.id and t3.status = 'RECORDING' " +
             "where t1.id = #{roomId}")

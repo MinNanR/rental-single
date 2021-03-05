@@ -178,4 +178,12 @@ public class BillController {
         BillData vo = billService.getBillData(dto);
         return ResponseEntity.success(vo);
     }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PostMapping("fillBill")
+    public ResponseEntity<?> fillBill(@RequestBody @Valid FillBillDTO dto){
+        billService.fillMonthlyBill(dto);
+        return ResponseEntity.success(dto);
+    }
+
 }

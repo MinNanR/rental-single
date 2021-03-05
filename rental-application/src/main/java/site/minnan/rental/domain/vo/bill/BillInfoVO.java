@@ -1,5 +1,6 @@
 package site.minnan.rental.domain.vo.bill;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import lombok.Builder;
 import lombok.Data;
@@ -8,6 +9,7 @@ import site.minnan.rental.domain.entity.BillDetails;
 import site.minnan.rental.infrastructure.enumerate.PaymentMethod;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 /**
@@ -111,14 +113,15 @@ public class BillInfoVO {
     }
 
     public static BillInfoVO assemble(BillDetails bill) {
+        DateTime endDate = DateTime.of(bill.getStartDate());
         return BillInfoVO.builder()
                 .id(bill.getId())
                 .houseId(bill.getHouseId())
                 .houseName(bill.getHouseName())
                 .roomId(bill.getRoomId())
                 .roomNumber(bill.getRoomNumber())
-                .year(bill.getYear())
-                .month(bill.getMonth())
+                .year(endDate.year())
+                .month(endDate.month())
                 .waterUsage(bill.getWaterUsage())
                 .waterCharge(bill.getWaterCharge())
                 .electricityUsage(bill.getElectricityUsage())

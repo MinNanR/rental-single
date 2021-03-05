@@ -3,10 +3,7 @@ package site.minnan.rental.domain.aggregate;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import site.minnan.rental.domain.entity.JwtUser;
 import site.minnan.rental.infrastructure.enumerate.UtilityStatus;
 import site.minnan.rental.userinterface.dto.utility.AddUtilityDTO;
@@ -51,11 +48,13 @@ public class Utility {
     /**
      * 水表计数
      */
+    @Setter
     private BigDecimal water;
 
     /**
      * 电表计数
      */
+    @Setter
     private BigDecimal electricity;
 
     /**
