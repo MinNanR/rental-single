@@ -95,7 +95,7 @@ public class UtilityServiceImpl implements UtilityService {
                 .set("status", UtilityStatus.RECORDED);
         utilityMapper.update(null, updateWrapper);
         utilityMapper.addUtilityBatch(newUtilityList);
-        billProviderService.completeBill(roomIdSet);
+//        billProviderService.completeBill(roomIdSet);
     }
 
     /**

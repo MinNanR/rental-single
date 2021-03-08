@@ -81,6 +81,10 @@ public class BillInfoVO {
 
     private BigDecimal electricityEnd;
 
+    private String startDate;
+
+    private String endDate;
+
     public static BillInfoVO assemble(Bill bill) {
         return BillInfoVO.builder()
                 .id(bill.getId())
@@ -100,7 +104,7 @@ public class BillInfoVO {
                 .accessCardCharge(bill.getAccessCardCharge())
                 .totalCharge(bill.totalCharge())
                 .updateTime(DateUtil.format(bill.getUpdateTime(), "MM-dd"))
-                .completeDate(DateUtil.format(bill.getCompletedDate(), "MM-dd"))
+                .completeDate(DateUtil.format(bill.getCreateTime(), "MM-dd"))
                 .payTime(DateUtil.format(bill.getPayTime(), "MM-dd"))
                 .paymentMethod(Optional.ofNullable(bill.getPaymentMethod()).map(PaymentMethod::getMethod).orElse(""))
                 .paymentMethodCode(Optional.ofNullable(bill.getPaymentMethod()).map(PaymentMethod::getValue).orElse(""))
@@ -145,6 +149,8 @@ public class BillInfoVO {
                 .waterEnd(bill.getWaterEnd())
                 .electricityStart(bill.getElectricityStart())
                 .electricityEnd(bill.getElectricityEnd())
+                .startDate(DateUtil.format(bill.getStartDate(), "yyyy-MM-dd"))
+                .endDate(DateUtil.format(bill.getEndDate(), "yyyy-MM-dd"))
                 .build();
     }
 }

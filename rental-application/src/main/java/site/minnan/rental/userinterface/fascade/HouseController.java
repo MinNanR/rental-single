@@ -27,7 +27,7 @@ public class HouseController {
     @Autowired
     private HouseService houseService;
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getHouseList")
     public ResponseEntity<ListQueryVO<HouseVO>> getHouseList(@RequestBody @Valid GetHouseListDTO dto) {
         ListQueryVO<HouseVO> houseList = houseService.getHouseList(dto);
@@ -41,7 +41,7 @@ public class HouseController {
         return ResponseEntity.success();
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getHouseInfo")
     public ResponseEntity<HouseInfoVO> getHouseInfo(@RequestBody @Valid DetailsQueryDTO dto) {
         HouseInfoVO houseInfo = houseService.getHouseInfo(dto);
@@ -55,7 +55,7 @@ public class HouseController {
         return ResponseEntity.success();
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getHouseDropDown")
     public ResponseEntity<?> getHouseDropDown(){
         List<HouseDropDown> vo = houseService.getHouseDropDown();

@@ -371,7 +371,7 @@ public class TenantServiceImpl implements TenantService {
         Map<Character, List<TenantAppVO>> groupByPinyin = tenantList.stream()
                 .collect(Collectors.groupingBy(e -> pinyinEngine.getFirstLetter(e.getName().charAt(0)),
                         Collectors.collectingAndThen(Collectors.toList(), (e -> e.stream()
-                                .sorted(Comparator.comparing(t1 -> pinyinEngine.getPinyin(t1.getName(),"")))
+                                .sorted(Comparator.comparing(t1 -> pinyinEngine.getPinyin(t1.getName(), "")))
                                 .map(TenantAppVO::assemble)
                                 .collect(Collectors.toList())))));
         return groupByPinyin.entrySet().stream()
@@ -464,8 +464,10 @@ public class TenantServiceImpl implements TenantService {
                 .build();
         roomProviderService.updateRoomStatus(updateRoomStatusDTO);
 
-        if (dto.getWater() != null || dto.getElectricity()!=null) {
+        //如果填写了水电则更新水电
+        if (dto.getWater() != null || dto.getElectricity() != null) {
             AddUtilityDTO addUtilityDTO = AddUtilityDTO.builder()
+                    .roomId(dto.getRoomId())
                     .water(dto.getWater())
                     .electricity(dto.getElectricity())
                     .build();
@@ -499,10 +501,10 @@ public class TenantServiceImpl implements TenantService {
         Tenant tenant = tenantProviderService.getTenantByUserId(jwtUser.getId());
         String name = tenant.getName();
         TenantBaseInfoVO vo;
-        if(StrUtil.isNotBlank(name)){
+        if (StrUtil.isNotBlank(name)) {
             char firstLetter = pinyinEngine.getFirstLetter(name.charAt(0));
             vo = new TenantBaseInfoVO(tenant, String.valueOf(firstLetter).toUpperCase());
-        }else{
+        } else {
             vo = new TenantBaseInfoVO(tenant, "");
         }
         return vo;

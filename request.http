@@ -33,6 +33,9 @@ User-Agent: Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/
 > {% client.global.set("tenant_token", "Bearer " + response.body.data.token); %}
 
 ###
+POST {{authUrl}}/auth/login/tester
+
+###
 POST {{userUrl}}/user/getUserList
 Content-Type: application/json
 Authorization: {{admin_token}}
@@ -51,6 +54,17 @@ Authorization: {{admin_token}}
   "username": "18925503712",
   "password": "d31b530952bdc79c84303e5a9705651c",
   "realName": "强"
+}
+
+###
+POST {{userUrl}}/user/addUser/guest
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "username": "test",
+  "password": "f5d1278e8109edd94e1e4197e04873b9",
+  "realName": "测试人员"
 }
 
 ###

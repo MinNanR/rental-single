@@ -53,14 +53,14 @@ public class BillController {
         return ResponseEntity.success();
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getUtilityPrice")
     public ResponseEntity<UtilityPrice> getUtilityPrice() {
         UtilityPrice utilityPrice = billService.getUtilityPrice();
         return ResponseEntity.success(utilityPrice);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getUtilityStatusDropDown")
     public ResponseEntity<List<BillStatusDropDown>> getUtilityStatusDropDown() {
         List<BillStatusDropDown> dropDownList = Arrays.stream(UtilityStatus.values())
@@ -69,7 +69,7 @@ public class BillController {
         return ResponseEntity.success(dropDownList);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getBillStatusDropDown")
     public ResponseEntity<List<BillStatusDropDown>> getBillStatusDropDown() {
         List<BillStatusDropDown> dropDownList = Arrays.stream(ArrayUtil.sub(BillStatus.values(), 1,
@@ -79,7 +79,7 @@ public class BillController {
         return ResponseEntity.success(dropDownList);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getBillList/{status}")
     public ResponseEntity<ListQueryVO<BillVO>> getBillList(@RequestBody @Valid GetBillListDTO dto,
                                                            @PathVariable("status") String status) {
@@ -88,14 +88,14 @@ public class BillController {
         return ResponseEntity.success(vo);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getBillList")
     public ResponseEntity<ListQueryVO<BillVO>> getBillList(@RequestBody @Valid ListQueryDTO dto) {
         ListQueryVO<BillVO> vo = billService.getBillList(dto);
         return ResponseEntity.success(vo);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','LANDLORD','GUEST')")
     @PostMapping("getBills")
     public ResponseEntity<ListQueryVO<BillInfoVO>> getBills(@RequestBody @Valid GetBillsDTO dto){
         ListQueryVO<BillInfoVO> vo = billService.getBills(dto);
@@ -103,7 +103,7 @@ public class BillController {
     }
 
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getMonthTotal")
     public ResponseEntity<String> getMonthTotal() {
         BigDecimal total = billService.getMonthTotal();
@@ -111,7 +111,7 @@ public class BillController {
         return ResponseEntity.success(totalStr);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getBillInfo")
     public ResponseEntity<BillInfoVO> getBillInfo(@RequestBody @Valid DetailsQueryDTO dto) {
         BillInfoVO vo = billService.getBillInfo(dto);
@@ -151,7 +151,7 @@ public class BillController {
         return ResponseEntity.success();
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getRoomBillList")
     public ResponseEntity<?> getRoomBillList(@RequestBody @Valid GetBillListDTO dto){
         ListQueryVO<BillVO> vo = billService.getRoomBillList(dto);
@@ -172,7 +172,7 @@ public class BillController {
         return ResponseEntity.success(vo);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','LANDLORD','GUEST')")
     @PostMapping("getBillData")
     public ResponseEntity<BillData> getBillData(@RequestBody @Valid GetBillDataDTO dto){
         BillData vo = billService.getBillData(dto);
@@ -184,6 +184,13 @@ public class BillController {
     public ResponseEntity<?> fillBill(@RequestBody @Valid FillBillDTO dto){
         billService.fillMonthlyBill(dto);
         return ResponseEntity.success(dto);
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN','LANDLORD')")
+    @PostMapping("modifyBill")
+    public ResponseEntity<?> modifyBill(@RequestBody @Valid ModifyBillDTO dto){
+        billService.modifyBill(dto);
+        return ResponseEntity.success();
     }
 
 }

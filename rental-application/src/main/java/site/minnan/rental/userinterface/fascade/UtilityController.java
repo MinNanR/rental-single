@@ -53,14 +53,14 @@ public class UtilityController {
         return ResponseEntity.success();
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getUtilityList")
     public ResponseEntity<ListQueryVO<UtilityVO>> getUtilityList(@RequestBody @Valid GetUtilityDTO dto) {
         ListQueryVO<UtilityVO> vo = utilityService.getUtilityList(dto);
         return ResponseEntity.success(vo);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getRecordList")
     public ResponseEntity<ListQueryVO<UtilityRecordVO>> getRecordList(@RequestBody @Valid GetRecordListDTO dto) {
         ListQueryVO<UtilityRecordVO> vo = utilityService.getRecordList(dto);

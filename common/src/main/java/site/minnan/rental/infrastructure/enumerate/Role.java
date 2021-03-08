@@ -11,7 +11,8 @@ public enum Role {
 
     ADMIN("ADMIN", "管理员"),
     LANDLORD("LANDLORD", "房东"),
-    TENANT("TENANT", "房客");
+    TENANT("TENANT", "房客"),
+    GUEST("GUEST","访客");
 
     @EnumValue
     private final String value;

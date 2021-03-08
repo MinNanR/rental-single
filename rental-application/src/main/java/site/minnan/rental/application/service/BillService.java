@@ -145,4 +145,11 @@ public interface BillService {
      * @param dto
      */
     void fillMonthlyBill(FillBillDTO dto);
+
+    /**
+     * 修改账单数据
+     *
+     * @param dto
+     */
+    void modifyBill(ModifyBillDTO dto);
 }

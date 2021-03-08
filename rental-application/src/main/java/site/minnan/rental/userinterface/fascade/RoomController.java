@@ -38,14 +38,14 @@ public class RoomController {
         return ResponseEntity.success();
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getRoomList")
     public ResponseEntity<ListQueryVO<RoomVO>> getRoomList(@RequestBody @Valid GetRoomListDTO dto) {
         ListQueryVO<RoomVO> vo = roomService.getRoomList(dto);
         return ResponseEntity.success(vo);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getRoomInfo")
     public ResponseEntity<RoomInfoVO> getRoomInfo(@RequestBody @Valid DetailsQueryDTO dto) {
         RoomInfoVO vo = roomService.getRoomInfo(dto);
@@ -59,14 +59,14 @@ public class RoomController {
         return ResponseEntity.success();
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("checkRoomNumberUsed")
     public ResponseEntity<Boolean> checkRoomNumberUsed(@RequestBody @Valid CheckRoomNumberDTO dto) {
         Boolean check = roomService.checkRoomNumberUsed(dto);
         return ResponseEntity.success(check);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getRoomStatusDropDown")
     public ResponseEntity<List<RoomStatusDropDown>> getRoomStatus() {
         List<RoomStatusDropDown> dropDownList = Arrays.stream(RoomStatus.values())
@@ -76,21 +76,21 @@ public class RoomController {
         return ResponseEntity.success(dropDownList);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getRoomDropDown")
     public ResponseEntity<List<RoomDropDown>> getRoomDropDown(@RequestBody @Valid GetRoomDropDownDTO dto) {
         List<RoomDropDown> roomDropDown = roomService.getRoomDropDown(dto);
         return ResponseEntity.success(roomDropDown);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getAllRoom")
     public ResponseEntity<Collection<FloorVO>> getAllRoom(@RequestBody @Valid GetFloorDTO dto){
         Collection<FloorVO> vo = roomService.getAllRoom(dto);
         return ResponseEntity.success(vo);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','LANDLORD','GUEST')")
     @PostMapping("getFloorDropDown")
     public ResponseEntity<Collection<FloorDropDown>> getFloorDropDown(){
         Collection<FloorDropDown> vo = roomService.getFloorDropDown();
@@ -98,7 +98,7 @@ public class RoomController {
     }
 
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getRoomByFloor")
     public ResponseEntity<Collection<UtilityInitVO>> getRoomByFloor(@RequestBody @Valid GetRoomToRecordDTO dto){
         Collection<UtilityInitVO> roomCollection = roomService.getRoomToRecord(dto);

@@ -174,7 +174,6 @@ public class BillServiceImpl implements BillService {
                             .roomId(roomInfo.getId())
                             .roomNumber(roomInfo.getRoomNumber())
                             .rent(roomInfo.getPrice())
-                            .completedDate(oneMonthLater)
                             .startDate(oneMonthLater)
                             .endDate(twoMonthLater)
                             .utilityStartId(utilityMap.get(roomInfo.getId()))
@@ -254,7 +253,6 @@ public class BillServiceImpl implements BillService {
      */
     @Override
     public BillInfoVO getBillInfo(DetailsQueryDTO dto) {
-//        Bill bill = billMapper.selectById(dto.getId());
         BillDetails bill = billMapper.getBillDetails(dto.getId());
         BillInfoVO vo = BillInfoVO.assemble(bill);
         return vo;
@@ -349,7 +347,7 @@ public class BillServiceImpl implements BillService {
         UpdateWrapper<Bill> unconfirmedUpdateWrapper = new UpdateWrapper<>();
         if (BillType.CHECK_IN.equals(bill.getType())) {
             unconfirmedUpdateWrapper.set("utility_start_id", currentUtilityId).eq("id", dto.getId());
-        }else{
+        } else {
             unconfirmedUpdateWrapper.set("utility_end_id", currentUtilityId).eq("id", dto.getId());
             //获取更新后的当前账单记录
             UtilityPrice price = getUtilityPrice();
@@ -393,10 +391,10 @@ public class BillServiceImpl implements BillService {
             throw new EntityNotExistException("账单不存在");
         }
         UpdateWrapper<Bill> updateWrapper = new UpdateWrapper<>();
-        if(BillType.CHECK_IN.equals(bill.getType())){
+        if (BillType.CHECK_IN.equals(bill.getType())) {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             updateWrapper.set("status", BillStatus.PAID).set("pay_time", timestamp);
-        }else{
+        } else {
             updateWrapper.set("status", BillStatus.UNPAID);
         }
         updateWrapper.eq("id", dto.getId());
@@ -458,7 +456,6 @@ public class BillServiceImpl implements BillService {
                         .roomId(bill.getRoomId())
                         .roomNumber(bill.getRoomNumber())
                         .rent(room.getInt("price"))
-                        .completedDate(time.offsetNew(DateField.MONTH, 1))
                         .startDate(time.offsetNew(DateField.MONTH, 1))
                         .endDate(time.offsetNew(DateField.MONTH, 2))
                         .utilityStartId(bill.getUtilityEndId())
@@ -485,14 +482,14 @@ public class BillServiceImpl implements BillService {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Tenant tenant = tenantProviderService.getTenantByUserId(jwtUser.getId());
         Integer count = billMapper.countBillByTenant(tenant.getId());
-        if(count > 0){
+        if (count > 0) {
             Integer pageIndex = dto.getPageIndex();
             Integer pageSize = dto.getPageSize();
             Integer start = (pageIndex - 1) * pageSize;
             List<Bill> billList = billMapper.getBillListByTenant(tenant.getId(), start, pageSize);
             List<BillVO> list = billList.stream().map(BillVO::of).collect(Collectors.toList());
             return new ListQueryVO<>(list, (long) count);
-        }else{
+        } else {
             return new ListQueryVO<>(ListUtil.empty(), 0L);
         }
     }
@@ -542,6 +539,7 @@ public class BillServiceImpl implements BillService {
         bill.settleElectricity(price.getElectricityPrice());
         bill.setStartDate(DateUtil.parseDate(dto.getStartDate()));
         bill.setEndDate(DateUtil.parseDate(dto.getEndDate()));
+        bill.setCompletedDate(new Timestamp(System.currentTimeMillis()));
         bill.unpaid();
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         bill.setUpdateUser(jwtUser);
@@ -569,5 +567,40 @@ public class BillServiceImpl implements BillService {
                 .build();
         newBill.setCreateUser(jwtUser.getId(), jwtUser.getRealName(), new Timestamp(System.currentTimeMillis()));
         billMapper.insert(newBill);
+    }
+
+    /**
+     * 修改账单数据
+     *
+     * @param dto
+     */
+    @Override
+    public void modifyBill(ModifyBillDTO dto) {
+        BillDetails bill = billMapper.getBillDetails(dto.getBillId());
+        if (bill == null) {
+            throw new EntityNotExistException("账单不存在");
+        } else if (BillStatus.PAID.equals(bill.getStatus())) {
+            throw new UnmodifiableException("账单不可修改");
+        }
+        BigDecimal waterStart = Optional.ofNullable(dto.getWaterStart()).orElse(bill.getWaterStart());
+        BigDecimal electricityStart = Optional.ofNullable(dto.getElectricityStart()).orElse(bill.getElectricityStart());
+        Utility start = utilityProviderService.getOrUpdateUtility(bill.getUtilityStartId(), waterStart,
+                electricityStart);
+        BigDecimal waterEnd = Optional.ofNullable(dto.getWaterEnd()).orElse(bill.getWaterEnd());
+        BigDecimal electricityEnd = Optional.ofNullable(dto.getElectricityEnd()).orElse(bill.getElectricityEnd());
+        Utility end = utilityProviderService.getOrUpdateUtility(bill.getUtilityEndId(), waterEnd, electricityEnd);
+        UtilityPrice price = getUtilityPrice();
+        bill.setUtilityStart(start);
+        bill.setUtilityEnd(end);
+        bill.settleWater(price.getWaterPrice());
+        bill.settleElectricity(price.getElectricityPrice());
+        Optional.ofNullable(dto.getStartDate()).ifPresent(s -> bill.setStartDate(DateUtil.parseDate(s)));
+        Optional.ofNullable(dto.getEndDate()).ifPresent(s -> bill.setEndDate(DateUtil.parseDate(s)));
+        try {
+            receiptUtils.generateReceipt(bill);
+        } catch (IOException e) {
+            log.error("生成账单IO异常，id={}", bill.getId());
+        }
+        billMapper.updateById(bill);
     }
 }

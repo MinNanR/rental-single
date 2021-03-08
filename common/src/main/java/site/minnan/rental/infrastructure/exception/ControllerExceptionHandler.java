@@ -103,7 +103,7 @@ public class ControllerExceptionHandler {
     public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex, HandlerMethod method) {
         String uri = method.getMethod().getAnnotation(PostMapping.class).value()[0];
         log.error("无权限访问:" + uri, ex);
-        return ResponseEntity.invalid("无权限访问");
+        return ResponseEntity.invalid(ex.getMessage());
     }
 
     @ExceptionHandler(UnmodifiableException.class)

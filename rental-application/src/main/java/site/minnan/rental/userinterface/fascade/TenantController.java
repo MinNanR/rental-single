@@ -37,28 +37,28 @@ public class TenantController {
         return ResponseEntity.success();
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getTenantList")
     public ResponseEntity<ListQueryVO<TenantVO>> getTenantList(@RequestBody @Valid GetTenantListDTO dto) {
         ListQueryVO<TenantVO> vo = tenantService.getTenantList(dto);
         return ResponseEntity.success(vo);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getTenantByRoom")
     public ResponseEntity<List<TenantVO>> getTenantByRoom(@RequestBody @Valid GetTenantByRoomDTO dto) {
         List<TenantVO> tenantList = tenantService.getTenantByRoom(dto);
         return ResponseEntity.success(tenantList);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getTenantInfo")
     public ResponseEntity<TenantInfoVO> getTenantInfo(@RequestBody @Valid DetailsQueryDTO dto) {
         TenantInfoVO vo = tenantService.getTenantInfo(dto);
         return ResponseEntity.success(vo);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getTenantDropDown")
     public ResponseEntity<List<TenantDropDownVO>> getTenantDropDown(@RequestBody @Valid GetTenantDropDownDTO dto) {
         List<TenantDropDownVO> dropDownList = tenantService.getTenantDropDown(dto);
@@ -86,14 +86,14 @@ public class TenantController {
         return ResponseEntity.success();
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','LANDLORD','GUEST')")
     @PostMapping("checkIdNumber")
     public ResponseEntity<Boolean> checkIdentificationNumberExist(@RequestBody @Valid CheckIdentificationNumberDTO dto) {
         Boolean check = tenantService.checkIdentificationNumberExist(dto);
         return ResponseEntity.success(check);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
     @PostMapping("getTenantList/app")
     public ResponseEntity<List<TenantPinyinVO>> getTenantList() {
         List<TenantPinyinVO> vo = tenantService.getTenantList();

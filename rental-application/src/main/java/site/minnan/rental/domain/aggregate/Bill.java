@@ -117,7 +117,8 @@ public class Bill {
     /**
      * 结束日期
      */
-    private Date completedDate;
+    @Setter
+    private Timestamp completedDate;
 
     /**
      * 支付时间
@@ -265,7 +266,7 @@ public class Bill {
         this.status = BillStatus.UNPAID;
     }
 
-    public void surrenderCompleted(Date time) {
+    public void surrenderCompleted(Timestamp time) {
         this.completedDate = time;
     }
 

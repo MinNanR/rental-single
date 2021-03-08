@@ -85,7 +85,7 @@ public class BillProviderServiceImpl implements BillProviderService {
                 .deposit(dto.getDeposit())
                 .rent(roomInfo.getInt("price"))
                 .remark(dto.getRemark())
-                .completedDate(checkDate)
+                .completedDate(new Timestamp(checkDate.getTime()))
                 .startDate(checkDate)
                 .endDate(oneMonthLater)
                 .payTime(new Timestamp(checkDate.getTime()))
@@ -103,7 +103,6 @@ public class BillProviderServiceImpl implements BillProviderService {
                 .roomId(dto.getRoomId())
                 .roomNumber(roomInfo.getStr("roomNumber"))
                 .rent(roomInfo.getInt("price"))
-                .completedDate(oneMonthLater)
                 .startDate(oneMonthLater)
                 .endDate(twoMonthLater)
                 .utilityStartId(currentUtilityId)
@@ -144,8 +143,8 @@ public class BillProviderServiceImpl implements BillProviderService {
             } catch (IOException e) {
                 log.error("生成收据失败");
             }
-            Date date = new Date();
-            bill.surrenderCompleted(date);
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            bill.surrenderCompleted(now);
             billMapper.settleBatch(Collections.singletonList(bill));
         }
     }
@@ -184,7 +183,6 @@ public class BillProviderServiceImpl implements BillProviderService {
                             .roomId(roomInfo.getId())
                             .roomNumber(roomInfo.getRoomNumber())
                             .rent(roomInfo.getPrice())
-                            .completedDate(completeDate)
                             .startDate(startDate)
                             .endDate(endDate)
                             .utilityStartId(bill.getUtilityEndId())

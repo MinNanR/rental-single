@@ -169,11 +169,13 @@ public class ReceiptUtils {
         converterProperties.setFontProvider(fontProvider);
         converterProperties.setCharset("utf-8");
         File temp = File.createTempFile("temp", ".pdf");
-        Document document = new Document(new PdfDocument(new PdfWriter(temp)), PageSize.A4);
+        PdfWriter pdfWriter = new PdfWriter(temp);
+        Document document = new Document(new PdfDocument(pdfWriter), PageSize.A4);
         document.setMargins(10, 0, 10, 0);
         List<IElement> iElements = HtmlConverter.convertToElements(html, converterProperties);
         iElements.forEach(iElement -> document.add((IBlockElement) iElement));
         document.close();
+        pdfWriter.close();
         return temp;
     }
 
@@ -194,6 +196,9 @@ public class ReceiptUtils {
         InputStream imageStream = new ByteArrayInputStream(os.toByteArray());
         oss.putObject(bucketName, ossKey, imageStream);
         document.close();
+        documentStream.close();
+        os.close();
+        imageStream.close();
     }
 
     /**
@@ -265,13 +270,13 @@ public class ReceiptUtils {
         context.setVariable("waterStart", bill.getWaterStart().intValue());
         context.setVariable("waterEnd", bill.getWaterEnd().intValue());
         context.setVariable("waterUsage", bill.getWaterUsage());
-        context.setVariable("waterPrice", price.getWaterPrice());
+        context.setVariable("waterPrice", price.getWaterPrice().intValue());
         String[] waterCharge = splitNumber(bill.getWaterCharge().intValue());
         context.setVariable("waterCharge", waterCharge);
         //电费
         context.setVariable("electricityStart", bill.getElectricityStart().intValue());
         context.setVariable("electricityEnd", bill.getElectricityEnd().intValue());
-        context.setVariable("electricityUsage", bill.getElectricityUsage());
+        context.setVariable("electricityUsage", bill.getElectricityUsage().intValue());
         context.setVariable("electricityPrice", price.getElectricityPrice());
         String[] electricityCharge = splitNumber(bill.getElectricityCharge().intValue());
         context.setVariable("electricityCharge", electricityCharge);

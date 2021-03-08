@@ -3,6 +3,7 @@ package site.minnan.rental.domain.entity;
 import cn.hutool.core.math.MathUtil;
 import lombok.Data;
 import site.minnan.rental.domain.aggregate.Bill;
+import site.minnan.rental.domain.aggregate.Utility;
 
 import java.math.BigDecimal;
 
@@ -38,5 +39,15 @@ public class BillDetails extends Bill {
                 this.electricityEnd.add(ELECTRICITY_MAX) :
                 this.electricityEnd;
         super.settleElectricity(electricityStart, electricityEnd, price);
+    }
+
+    public void setUtilityStart(Utility utilityStart) {
+        this.waterStart = utilityStart.getWater();
+        this.electricityStart = utilityStart.getElectricity();
+    }
+
+    public void setUtilityEnd(Utility utilityEnd) {
+        this.waterEnd = utilityEnd.getWater();
+        this.electricityEnd = utilityEnd.getElectricity();
     }
 }
