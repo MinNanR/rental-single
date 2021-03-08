@@ -88,7 +88,7 @@ public interface BillMapper extends BaseMapper<Bill> {
 
     @Select("select t1.id id, t1.water_charge waterCharge, t1.electricity_charge electricityCharge, " +
             "t1.access_card_charge, t1.rent rent, t1.deposit deposit, t1.type type, t1.status status,t1.year year, " +
-            "t1.month month from rental_bill t1 " +
+            "t1.month month, t1.update_time updateTime from rental_bill t1 " +
             "left join rental_bill_tenant_relevance t2 on t1.id = t2.bill_id " +
             "where t2.tenant_id = #{tenantId} and (t1.status = 'UNPAID' or t1.status = 'PAID') " +
             "limit #{start}, #{pageSize}")

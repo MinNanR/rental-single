@@ -23,11 +23,14 @@ public class TenantBaseInfoVO {
 
     private Long checkInDays;
 
+    private Integer roomId;
+
     public TenantBaseInfoVO(Tenant tenant, String firstPinyinLetter){
         this.name = tenant.getName();
         this.firstPinyinLetter = firstPinyinLetter;
         this.roomNumber = tenant.getRoomNumber();
         this.checkInDate = DateUtil.format(tenant.getCreateTime(),"yyyy年M月d日");
         this.checkInDays = DateUtil.betweenDay(tenant.getCreateTime(), DateTime.now(),true);
+        this.roomId = tenant.getRoomId();
     }
 }

@@ -111,7 +111,7 @@ public class BillController {
         return ResponseEntity.success(totalStr);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST','TENANT')")
     @PostMapping("getBillInfo")
     public ResponseEntity<BillInfoVO> getBillInfo(@RequestBody @Valid DetailsQueryDTO dto) {
         BillInfoVO vo = billService.getBillInfo(dto);
@@ -167,7 +167,7 @@ public class BillController {
 
     @PreAuthorize("hasAnyAuthority('TENANT')")
     @PostMapping("getTenantBill")
-    public ResponseEntity<?> getTenantBill(@RequestBody @Valid ListQueryDTO dto){
+    public ResponseEntity<ListQueryVO<BillVO>> getTenantBill(@RequestBody @Valid ListQueryDTO dto){
         ListQueryVO<BillVO> vo = billService.getTenantBillList(dto);
         return ResponseEntity.success(vo);
     }
