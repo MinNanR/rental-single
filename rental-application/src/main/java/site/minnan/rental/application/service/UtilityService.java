@@ -2,9 +2,11 @@ package site.minnan.rental.application.service;
 
 import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.vo.ListQueryVO;
+import site.minnan.rental.domain.vo.bill.ChartVO;
 import site.minnan.rental.domain.vo.utility.UtilityFileVO;
 import site.minnan.rental.domain.vo.utility.UtilityRecordVO;
 import site.minnan.rental.domain.vo.utility.UtilityVO;
+import site.minnan.rental.userinterface.dto.ListQueryDTO;
 import site.minnan.rental.userinterface.dto.utility.AddUtilityDTO;
 import site.minnan.rental.userinterface.dto.utility.GetRecordListDTO;
 import site.minnan.rental.userinterface.dto.utility.GetUtilityDTO;
@@ -23,6 +25,7 @@ public interface UtilityService {
 
     /**
      * 登记水电（单个房间）
+     *
      * @param dto
      */
     Utility addUtility(AddUtilityDTO dto);
@@ -57,7 +60,16 @@ public interface UtilityService {
 
     /**
      * 获取水电记录的备份记录
+     *
      * @return
      */
     List<UtilityFileVO> getUtilityFileList();
+
+    /**
+     * 房客查看水电记录
+     *
+     * @param dto
+     * @return
+     */
+    ListQueryVO<UtilityVO> getUtilityByTenant(ListQueryDTO dto);
 }

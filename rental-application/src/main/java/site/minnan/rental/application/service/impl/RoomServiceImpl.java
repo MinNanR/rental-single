@@ -31,7 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class RooServiceImpl implements RoomService {
+public class RoomServiceImpl implements RoomService {
 
     @Autowired
     private RoomMapper roomMapper;

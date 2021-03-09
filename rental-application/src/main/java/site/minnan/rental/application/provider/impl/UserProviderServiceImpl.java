@@ -20,6 +20,7 @@ import site.minnan.rental.userinterface.response.ResponseEntity;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -132,6 +133,7 @@ public class UserProviderServiceImpl implements UserProviderService {
                     .realName(dto.getRealName())
                     .role(Role.TENANT)
                     .enabled(AuthUser.ENABLE)
+                    .passwordStamp(UUID.randomUUID().toString().replaceAll("-", ""))
                     .build();
             authUser.setCreateUser(dto.getUserId(), dto.getUserName());
             newUserList.add(authUser);

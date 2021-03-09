@@ -34,6 +34,7 @@ import site.minnan.rental.domain.vo.bill.BillData;
 import site.minnan.rental.domain.vo.bill.BillInfoVO;
 import site.minnan.rental.domain.vo.bill.BillVO;
 import site.minnan.rental.domain.vo.ListQueryVO;
+import site.minnan.rental.domain.vo.bill.ChartVO;
 import site.minnan.rental.domain.vo.utility.UtilityPrice;
 import site.minnan.rental.infrastructure.enumerate.BillStatus;
 import site.minnan.rental.infrastructure.enumerate.BillType;
@@ -206,9 +207,8 @@ public class BillServiceImpl implements BillService {
         if (count == 0) {
             return new ListQueryVO<>(new ArrayList<>(), 0L);
         }
-        Integer pageIndex = dto.getPageIndex();
         Integer pageSize = dto.getPageSize();
-        Integer start = (pageIndex - 1) * pageSize;
+        Integer start = dto.getStart();
         List<BillTenantEntity> list = billMapper.getBillList(dto.getStatus(), start, pageSize);
         Collection<BillVO> collection = list.stream().collect(Collectors.groupingBy(Bill::getId,
                 Collectors.collectingAndThen(Collectors.toList(), e -> {
@@ -483,9 +483,8 @@ public class BillServiceImpl implements BillService {
         Tenant tenant = tenantProviderService.getTenantByUserId(jwtUser.getId());
         Integer count = billMapper.countBillByTenant(tenant.getId());
         if (count > 0) {
-            Integer pageIndex = dto.getPageIndex();
             Integer pageSize = dto.getPageSize();
-            Integer start = (pageIndex - 1) * pageSize;
+            Integer start = dto.getStart();
             List<Bill> billList = billMapper.getBillListByTenant(tenant.getId(), start, pageSize);
             List<BillVO> list = billList.stream().map(BillVO::of).collect(Collectors.toList());
             return new ListQueryVO<>(list, (long) count);
@@ -567,6 +566,12 @@ public class BillServiceImpl implements BillService {
                 .build();
         newBill.setCreateUser(jwtUser.getId(), jwtUser.getRealName(), new Timestamp(System.currentTimeMillis()));
         billMapper.insert(newBill);
+
+        List<Integer> tenantIdList = tenantProviderService.getTenantByRoomId(bill.getRoomId());
+        List<BillTenantRelevance> relevanceList =
+                tenantIdList.stream().map(e -> BillTenantRelevance.of(newBill.getId(), e)).collect(Collectors.toList());
+        billTenantRelevanceMapper.insertBatch(relevanceList);
+
     }
 
     /**
@@ -602,5 +607,19 @@ public class BillServiceImpl implements BillService {
             log.error("生成账单IO异常，id={}", bill.getId());
         }
         billMapper.updateById(bill);
+    }
+
+    /**
+     * 获取图表数据
+     *
+     * @return
+     */
+    @Override
+    public List<ChartVO> getChartData() {
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Tenant tenant = tenantProviderService.getTenantByUserId(jwtUser.getId());
+        List<Bill> billList = billMapper.getChartData(tenant.getId());
+        List<ChartVO> vo = billList.stream().map(ChartVO::assemble).collect(Collectors.toList());
+        return vo;
     }
 }

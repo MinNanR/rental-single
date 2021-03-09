@@ -1,5 +1,6 @@
 package site.minnan.rental.application.service.impl;
 
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUnit;
@@ -22,19 +23,25 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.minnan.rental.application.provider.BillProviderService;
+import site.minnan.rental.application.provider.TenantProviderService;
 import site.minnan.rental.application.service.UtilityService;
+import site.minnan.rental.domain.aggregate.Bill;
+import site.minnan.rental.domain.aggregate.Tenant;
 import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.entity.JwtUser;
 import site.minnan.rental.domain.entity.UtilityRecord;
+import site.minnan.rental.domain.mapper.BillMapper;
 import site.minnan.rental.domain.mapper.UtilityMapper;
 import site.minnan.rental.domain.mapper.UtilityRecordMapper;
 import site.minnan.rental.domain.vo.ListQueryVO;
+import site.minnan.rental.domain.vo.bill.ChartVO;
 import site.minnan.rental.domain.vo.utility.UtilityFileVO;
 import site.minnan.rental.domain.vo.utility.UtilityRecordVO;
 import site.minnan.rental.domain.vo.utility.UtilityVO;
 import site.minnan.rental.infrastructure.enumerate.UtilityStatus;
 import site.minnan.rental.infrastructure.exception.UnmodifiableException;
 import site.minnan.rental.infrastructure.utils.RedisUtil;
+import site.minnan.rental.userinterface.dto.ListQueryDTO;
 import site.minnan.rental.userinterface.dto.utility.AddUtilityDTO;
 import site.minnan.rental.userinterface.dto.utility.GetRecordListDTO;
 import site.minnan.rental.userinterface.dto.utility.GetUtilityDTO;
@@ -60,6 +67,9 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Autowired
     private BillProviderService billProviderService;
+
+    @Autowired
+    private TenantProviderService tenantProviderService;
 
     @Autowired
     private OSS oss;
@@ -307,5 +317,26 @@ public class UtilityServiceImpl implements UtilityService {
         BufferedInputStream is = FileUtil.getInputStream(temp);
         oss.putObject(bucketName, ossKey, is);
         log.info("备份{}完成", StrUtil.format("{}水电记录", houseNameAndRoomNumber));
+    }
+
+    /**
+     * 房客查看水电记录
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public ListQueryVO<UtilityVO> getUtilityByTenant(ListQueryDTO dto) {
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Tenant tenant = tenantProviderService.getTenantByUserId(jwtUser.getId());
+        Integer count = utilityMapper.countUtilityByTenant(tenant.getId());
+        if (count > 0) {
+            List<Utility> utilityList = utilityMapper.getUtilityByTenant(tenant.getId(), dto.getStart(),
+                    dto.getPageSize());
+            List<UtilityVO> list = utilityList.stream().map(UtilityVO::assemble).collect(Collectors.toList());
+            return new ListQueryVO<>(list, (long)count);
+        }else{
+            return new ListQueryVO<>(ListUtil.empty(), 0L);
+        }
     }
 }

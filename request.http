@@ -26,8 +26,8 @@ Content-Type: application/json
 User-Agent: Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Mobile Safari/537.36
 
 {
-  "username": "18183462305",
-  "password": "fb52a9c8f373f7f71fc17f5fb90c61d5"
+  "username": "17338389960",
+  "password": "f4c19855c8dba10ef214268dc69f0049"
 }
 
 > {% client.global.set("tenant_token", "Bearer " + response.body.data.token); %}
@@ -375,7 +375,6 @@ Authorization: {{admin_token}}
     "永泰街": 25,
     "三甲1号": 20
   }
-
 }
 
 ###
@@ -568,7 +567,9 @@ Content-Type: application/json
 Authorization: {{admin_token}}
 
 {
-  "idList": [21]
+  "idList": [
+    21
+  ]
 }
 
 ###
@@ -577,7 +578,7 @@ Content-Type: application/json
 Authorization: {{admin_token}}
 
 {
-  "pageSize":10,
+  "pageSize": 10,
   "pageIndex": 1
 }
 
@@ -597,3 +598,20 @@ Authorization: {{tenant_token}}
   "pageIndex": 1,
   "pageSize": 10
 }
+
+###
+POST {{userUrl}}/utility/getUtilityListByTenant
+Content-Type: application/json
+Authorization: {{tenant_token}}
+
+{
+  "pageIndex": 1,
+  "pageSize": 10
+}
+
+###
+POST {{billUrl}}/bill/getChartData
+Content-Type: application/json
+Authorization: {{tenant_token}}
+
+{}

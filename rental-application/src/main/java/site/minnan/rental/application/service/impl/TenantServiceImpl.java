@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import site.minnan.rental.application.provider.BillProviderService;
-import site.minnan.rental.application.provider.RoomProviderService;
-import site.minnan.rental.application.provider.TenantProviderService;
-import site.minnan.rental.application.provider.UtilityProviderService;
+import site.minnan.rental.application.provider.*;
 import site.minnan.rental.application.service.TenantService;
 import site.minnan.rental.domain.aggregate.Tenant;
 import site.minnan.rental.domain.entity.JwtUser;
@@ -65,6 +62,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Autowired
     private UtilityProviderService utilityProviderService;
+
+    @Autowired
+    private UserProviderService userProviderService;
 
     /**
      * 添加房客
@@ -519,20 +519,23 @@ public class TenantServiceImpl implements TenantService {
     private void addTenant(List<Tenant> tenantList) {
         //TODO 暂时不创建租客用户，完成用户端小程序时放开注释
 
-//        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//        List<AddTenantUserDTO> addUserDTO = new ArrayList<>();
-//        for (Tenant tenant : tenantList) {
-//            //添加房客用户
-//            AddTenantUserDTO tenantUserDTO = AddTenantUserDTO.builder()
-//                    .phone(tenant.getPhone())
-//                    .realName(tenant.getName())
-//                    .userId(jwtUser.getId())
-//                    .userName(jwtUser.getRealName())
-//                    .build();
-//            addUserDTO.add(tenantUserDTO);
-//        }
-//        List<Integer> userIdList = userProviderService.createTenantUserBatch(addUserDTO);
-//        Iterator<Integer> idIterator = userIdList.iterator();
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<AddTenantUserDTO> addUserDTO = new ArrayList<>();
+        for (Tenant tenant : tenantList) {
+            //添加房客用户
+            if(tenant.getPhone() != null){
+                AddTenantUserDTO tenantUserDTO = AddTenantUserDTO.builder()
+                        .phone(tenant.getPhone())
+                        .realName(tenant.getName())
+                        .userId(jwtUser.getId())
+                        .userName(jwtUser.getRealName())
+                        .build();
+                addUserDTO.add(tenantUserDTO);
+            }
+        }
+        List<Integer> userIdList = userProviderService.createTenantUserBatch(addUserDTO);
+        Iterator<Integer> idIterator = userIdList.iterator();
+        tenantList.forEach(e -> e.setUserId(idIterator.next()));
         tenantMapper.addTenantBatch(tenantList);
     }
 }

@@ -87,8 +87,8 @@ public interface BillMapper extends BaseMapper<Bill> {
     List<BillDetails> getBillDetailsList(@Param("roomIds") Iterable<Integer> roomIds);
 
     @Select("select t1.id id, t1.water_charge waterCharge, t1.electricity_charge electricityCharge, " +
-            "t1.access_card_charge, t1.rent rent, t1.deposit deposit, t1.type type, t1.status status,t1.year year, " +
-            "t1.month month, t1.update_time updateTime from rental_bill t1 " +
+            "t1.access_card_charge, t1.rent rent, t1.deposit deposit, t1.type type, t1.status status,t1.start_date " +
+            "startDate, t1.update_time updateTime from rental_bill t1 " +
             "left join rental_bill_tenant_relevance t2 on t1.id = t2.bill_id " +
             "where t2.tenant_id = #{tenantId} and (t1.status = 'UNPAID' or t1.status = 'PAID') " +
             "limit #{start}, #{pageSize}")
@@ -106,4 +106,10 @@ public interface BillMapper extends BaseMapper<Bill> {
             "left join rental_utility t3 on t2.utility_start_id = t3.id and t3.status = 'RECORDING' " +
             "where t1.id = #{roomId}")
     BillData getBillData(@Param("roomId")Integer roomId);
+
+    @Select("select t1.water_usage waterUsage, t1.electricity_usage, t1.start_date startDate " +
+            "from rental_bill t1 " +
+            "left join rental_bill_tenant_relevance t2 on t1.id = t2.bill_id " +
+            "where tenant_id = #{tenantId} and status != 'INIT' and type != 'CHECK_IN' limit 6")
+    List<Bill> getChartData(@Param("tenantId") Integer tenantId);
 }

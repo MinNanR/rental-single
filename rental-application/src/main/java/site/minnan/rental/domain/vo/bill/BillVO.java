@@ -1,5 +1,6 @@
 package site.minnan.rental.domain.vo.bill;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Builder;
@@ -60,8 +61,9 @@ public class BillVO {
                 .statusCode(bill.getStatus().getValue())
                 .type(bill.getType().getType())
                 .typeCode(bill.getType().getValue())
-                .month(bill.getMonth() + "月")
-                .time(StrUtil.format("{}年{}月", bill.getYear(), bill.getMonth()))
+                .month(DateTime.of(bill.getStartDate()).month() + 1 + "月")
+//                .time(StrUtil.format("{}年{}月", bill.getYear(), bill.getMonth()))
+                .time(DateUtil.format(bill.getStartDate(), "yyyy年M月"))
                 .updateTime(DateUtil.format(bill.getUpdateTime(), "yyyy-MM-dd"))
                 .build();
     }
@@ -74,7 +76,8 @@ public class BillVO {
                 .statusCode(bill.getStatus().getValue())
                 .type(bill.getType().getType())
                 .typeCode(bill.getType().getValue())
-                .time(StrUtil.format("{}年{}月", bill.getYear(), bill.getMonth()))
+                .time(DateUtil.format(bill.getStartDate(), "yyyy年M月"))
+                .month(DateTime.of(bill.getStartDate()).month() + 1  + "月")
                 .updateTime(DateUtil.format(bill.getUpdateTime(), "yyyy-MM-dd"))
                 .build();
     }

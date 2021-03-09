@@ -7,14 +7,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.minnan.rental.application.service.UtilityService;
+import site.minnan.rental.domain.vo.bill.ChartVO;
 import site.minnan.rental.domain.vo.ListQueryVO;
 import site.minnan.rental.domain.vo.utility.UtilityFileVO;
 import site.minnan.rental.domain.vo.utility.UtilityRecordVO;
 import site.minnan.rental.domain.vo.utility.UtilityVO;
-import site.minnan.rental.userinterface.dto.utility.AddUtilityDTO;
-import site.minnan.rental.userinterface.dto.utility.GetRecordListDTO;
-import site.minnan.rental.userinterface.dto.utility.GetUtilityDTO;
-import site.minnan.rental.userinterface.dto.utility.UpdateUtilityDTO;
+import site.minnan.rental.userinterface.dto.ListQueryDTO;
+import site.minnan.rental.userinterface.dto.utility.*;
 import site.minnan.rental.userinterface.response.ResponseEntity;
 
 import javax.validation.Valid;
@@ -41,7 +40,7 @@ public class UtilityController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
     @PostMapping("recordUtility/single")
-    public ResponseEntity<?> recordUtility(@RequestBody @Valid AddUtilityDTO dto){
+    public ResponseEntity<?> recordUtility(@RequestBody @Valid AddUtilityDTO dto) {
         utilityService.addUtility(dto);
         return ResponseEntity.success();
     }
@@ -69,8 +68,17 @@ public class UtilityController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
     @PostMapping("getRecordFile")
-    public ResponseEntity<List<UtilityFileVO>> getUtilityFileList(){
+    public ResponseEntity<List<UtilityFileVO>> getUtilityFileList() {
         List<UtilityFileVO> vo = utilityService.getUtilityFileList();
         return ResponseEntity.success(vo);
     }
+
+    @PreAuthorize("hasAnyAuthority('TENANT')")
+    @PostMapping("getUtilityListByTenant")
+    public ResponseEntity<ListQueryVO<UtilityVO>> getUtilityListByTenant(@RequestBody @Valid ListQueryDTO dto){
+        ListQueryVO<UtilityVO> vo = utilityService.getUtilityByTenant(dto);
+        return ResponseEntity.success(vo);
+    }
+
+
 }

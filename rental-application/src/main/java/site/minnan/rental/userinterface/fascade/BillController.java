@@ -8,10 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import site.minnan.rental.application.service.BillService;
 import site.minnan.rental.domain.vo.*;
-import site.minnan.rental.domain.vo.bill.BillData;
-import site.minnan.rental.domain.vo.bill.BillInfoVO;
-import site.minnan.rental.domain.vo.bill.BillStatusDropDown;
-import site.minnan.rental.domain.vo.bill.BillVO;
+import site.minnan.rental.domain.vo.bill.*;
 import site.minnan.rental.domain.vo.utility.UtilityPrice;
 import site.minnan.rental.infrastructure.enumerate.BillStatus;
 import site.minnan.rental.infrastructure.enumerate.UtilityStatus;
@@ -193,4 +190,10 @@ public class BillController {
         return ResponseEntity.success();
     }
 
+    @PreAuthorize("hasAnyAuthority('TENANT')")
+    @PostMapping("getChartData")
+    public ResponseEntity<List<ChartVO>> getChartVO(){
+        List<ChartVO> chartData = billService.getChartData();
+        return ResponseEntity.success(chartData);
+    }
 }

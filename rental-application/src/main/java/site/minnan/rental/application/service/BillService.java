@@ -4,6 +4,7 @@ import site.minnan.rental.domain.vo.bill.BillData;
 import site.minnan.rental.domain.vo.bill.BillInfoVO;
 import site.minnan.rental.domain.vo.bill.BillVO;
 import site.minnan.rental.domain.vo.ListQueryVO;
+import site.minnan.rental.domain.vo.bill.ChartVO;
 import site.minnan.rental.domain.vo.utility.UtilityPrice;
 import site.minnan.rental.userinterface.dto.*;
 import site.minnan.rental.userinterface.dto.bill.*;
@@ -11,6 +12,7 @@ import site.minnan.rental.userinterface.dto.utility.SetUtilityPriceDTO;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 账单服务
@@ -152,4 +154,11 @@ public interface BillService {
      * @param dto
      */
     void modifyBill(ModifyBillDTO dto);
+
+    /**
+     * 获取图表数据
+     *
+     * @return
+     */
+    List<ChartVO> getChartData();
 }
