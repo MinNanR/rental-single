@@ -615,3 +615,18 @@ Content-Type: application/json
 Authorization: {{tenant_token}}
 
 {}
+
+###
+POST {{billUrl}}/bill/fillBill
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "endDate": "2021-04-02",
+  "electricityEnd": 5855,
+  "waterStart": 1063,
+  "billId": 60,
+  "electricityStart": 5846,
+  "waterEnd": 1067,
+  "startDate": "2021-03-02"
+}

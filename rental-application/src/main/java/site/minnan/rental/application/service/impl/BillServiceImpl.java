@@ -516,9 +516,9 @@ public class BillServiceImpl implements BillService {
     @Transactional
     public void fillMonthlyBill(FillBillDTO dto) {
         //水电开始度数
-        utilityProviderService.getOrUpdateUtility(dto.getUtilityStartId(),
-                dto.getWaterStart(), dto.getWaterEnd());
         BillDetails bill = billMapper.getBillDetails(dto.getBillId());
+        utilityProviderService.getOrUpdateUtility(bill.getUtilityStartId(),
+                dto.getWaterStart(), dto.getWaterEnd());
 
         //添加水电记录
         AddUtilityDTO addUtilityDTO = AddUtilityDTO.builder()
