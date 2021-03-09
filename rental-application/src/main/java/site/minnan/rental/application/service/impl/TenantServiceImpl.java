@@ -533,9 +533,11 @@ public class TenantServiceImpl implements TenantService {
                 addUserDTO.add(tenantUserDTO);
             }
         }
-        List<Integer> userIdList = userProviderService.createTenantUserBatch(addUserDTO);
-        Iterator<Integer> idIterator = userIdList.iterator();
-        tenantList.forEach(e -> e.setUserId(idIterator.next()));
+        if(CollectionUtil.isNotEmpty(addUserDTO)){
+            List<Integer> userIdList = userProviderService.createTenantUserBatch(addUserDTO);
+            Iterator<Integer> idIterator = userIdList.iterator();
+            tenantList.forEach(e -> e.setUserId(idIterator.next()));
+        }
         tenantMapper.addTenantBatch(tenantList);
     }
 }

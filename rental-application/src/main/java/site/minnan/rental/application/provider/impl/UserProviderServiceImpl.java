@@ -1,5 +1,6 @@
 package site.minnan.rental.application.provider.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
