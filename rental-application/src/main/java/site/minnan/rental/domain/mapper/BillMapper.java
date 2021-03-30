@@ -103,8 +103,7 @@ public interface BillMapper extends BaseMapper<Bill> {
     @Select("select t2.id id, t1.price price,t3.water waterStart,t3.electricity electricityStart,t3.create_time " +
             "utilityStartDate,t3.id utilityStartId ,t2.start_date startDate, t2.end_date endDate from rental_room t1 " +
             "left join rental_bill t2 on t1.id = t2.room_id and t2.status = 'INIT' " +
-            "left join rental_utility t3 on t2.utility_start_id = t3.id and t3.status = 'RECORDING' " +
-            "where t1.id = #{roomId}")
+            "left join rental_utility t3 on t2.utility_start_id = t3.id where t1.id = #{roomId}")
     BillData getBillData(@Param("roomId")Integer roomId);
 
     @Select("select t1.water_usage waterUsage, t1.electricity_usage, t1.start_date startDate " +

@@ -96,10 +96,12 @@ public class UserServiceImpl implements UserService {
     }
 
     private Optional<AuthUser> getAuthUser(String username) {
-        if (StrUtil.isBlank(username)) return Optional.empty();
+        if (StrUtil.isBlank(username)) {
+            return Optional.empty();
+        }
         AuthUser userInRedis = (AuthUser) redisUtil.getValue("authUser::" + username);
         if (userInRedis != null) {
-            log.info("从redis中取出用户信息: {}", new JSONObject(userInRedis));
+            log.info("当前操作用户id:{},用户姓名:{}", userInRedis.getId(), userInRedis.getRealName());
             return Optional.of(userInRedis);
         }
         QueryWrapper<AuthUser> wrapper = new QueryWrapper<>();

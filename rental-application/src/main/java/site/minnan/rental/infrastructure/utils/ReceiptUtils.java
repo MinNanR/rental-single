@@ -277,7 +277,7 @@ public class ReceiptUtils {
         context.setVariable("electricityStart", bill.getElectricityStart().intValue());
         context.setVariable("electricityEnd", bill.getElectricityEnd().intValue());
         context.setVariable("electricityUsage", bill.getElectricityUsage().intValue());
-        context.setVariable("electricityPrice", price.getElectricityPrice());
+        context.setVariable("electricityPrice", price.getElectricityPrice().intValue());
         String[] electricityCharge = splitNumber(bill.getElectricityCharge().intValue());
         context.setVariable("electricityCharge", electricityCharge);
         //门禁卡

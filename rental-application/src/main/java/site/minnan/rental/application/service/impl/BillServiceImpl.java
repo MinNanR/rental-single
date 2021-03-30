@@ -203,24 +203,29 @@ public class BillServiceImpl implements BillService {
      */
     @Override
     public ListQueryVO<BillVO> getBillList(GetBillListDTO dto) {
-        Long count = billMapper.countBill(dto.getStatus());
-        if (count == 0) {
-            return new ListQueryVO<>(new ArrayList<>(), 0L);
-        }
-        Integer pageSize = dto.getPageSize();
-        Integer start = dto.getStart();
-        List<BillTenantEntity> list = billMapper.getBillList(dto.getStatus(), start, pageSize);
-        Collection<BillVO> collection = list.stream().collect(Collectors.groupingBy(Bill::getId,
-                Collectors.collectingAndThen(Collectors.toList(), e -> {
-                    BillTenantEntity entity = e.stream().findFirst().get();
-                    String name = e.stream().map(BillTenantEntity::getName).collect(Collectors.joining("、"));
-                    BillVO vo = BillVO.assemble(entity);
-                    vo.setTenantInfo(name, entity.getPhone());
-                    return vo;
-                })))
-                .values();
-        ArrayList<BillVO> vo = ListUtil.toList(collection);
-        return new ListQueryVO<>(vo, count);
+//        Long count = billMapper.countBill(dto.getStatus());
+//        if (count == 0) {
+//            return new ListQueryVO<>(new ArrayList<>(), 0L);
+//        }
+//        Integer pageSize = dto.getPageSize();
+//        Integer start = dto.getStart();
+//        List<BillTenantEntity> list = billMapper.getBillList(dto.getStatus(), start, pageSize);
+//        Collection<BillVO> collection = list.stream().collect(Collectors.groupingBy(Bill::getId,
+//                Collectors.collectingAndThen(Collectors.toList(), e -> {
+//                    BillTenantEntity entity = e.stream().findFirst().get();
+//                    String name = e.stream().map(BillTenantEntity::getName).collect(Collectors.joining("、"));
+//                    BillVO vo = BillVO.assemble(entity);
+//                    vo.setTenantInfo(name, entity.getPhone());
+//                    return vo;
+//                })))
+//                .values();
+//        ArrayList<BillVO> vo = ListUtil.toList(collection);
+        QueryWrapper<Bill> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("status", dto.getStatus());
+        Page<Bill> queryPage = new Page<>(dto.getPageIndex(), dto.getPageSize());
+        IPage<Bill> page = billMapper.selectPage(queryPage, queryWrapper);
+        List<BillVO> list = page.getRecords().stream().map(BillVO::assemble).collect(Collectors.toList());
+        return new ListQueryVO<>(list, page.getTotal());
     }
 
     /**

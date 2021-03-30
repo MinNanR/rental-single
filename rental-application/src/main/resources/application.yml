@@ -6,6 +6,10 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       max-lifetime: 600000
+      allow-pool-suspension: true
+      register-mbeans: true
+      idle-timeout: 60000
+      connection-timeout: 60000
 
   redis:
     host: minnan.site
@@ -17,6 +21,9 @@ server:
   port: 8101
 
 jwt:
+  route:
+    authentication:
+      path: /rental/auth/login/password
   header: Authorization
   expiration: 604800
   scret: min107
