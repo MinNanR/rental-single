@@ -20,7 +20,10 @@ public class ControllerLog {
     private void controllerLog() {
     }
 
-    @Around("controllerLog()")
+    @Pointcut("execution(public * site.minnan.rental.userinterface.fascade.SpecialController..*(..))")
+    private void imageLog(){}
+
+    @Around("controllerLog() && !imageLog()")
     public Object logAroundController(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         long time = System.currentTimeMillis();
         Object[] args = proceedingJoinPoint.getArgs();
