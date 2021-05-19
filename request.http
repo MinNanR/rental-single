@@ -600,6 +600,15 @@ Authorization: {{tenant_token}}
 }
 
 ###
+POST {{billUrl}}/bill/getBillData
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "roomId":36
+}
+
+###
 POST {{userUrl}}/utility/getUtilityListByTenant
 Content-Type: application/json
 Authorization: {{tenant_token}}
@@ -629,4 +638,19 @@ Authorization: {{admin_token}}
   "electricityStart": 5846,
   "waterEnd": 1067,
   "startDate": "2021-03-02"
+}
+
+###
+POST http://localhost:8101/album/listEvent
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+###
+POST http://localhost:8101/album/addEvent
+Content-Type: application/json
+Authorization: {{admin_token}}
+
+{
+  "description": "汕头旅行",
+  "time": "2019-02-13"
 }
