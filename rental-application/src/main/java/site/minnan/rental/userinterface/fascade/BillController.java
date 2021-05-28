@@ -108,6 +108,13 @@ public class BillController {
         return ResponseEntity.success(totalStr);
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST')")
+    @PostMapping("getMonthTotal/v2")
+    public ResponseEntity<List<MonthTotalVO>> getMonthTotalList(){
+        List<MonthTotalVO> monthTotalList = billService.getMonthTotalVO();
+        return ResponseEntity.success(monthTotalList);
+    }
+
     @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD','GUEST','TENANT')")
     @PostMapping("getBillInfo")
     public ResponseEntity<BillInfoVO> getBillInfo(@RequestBody @Valid DetailsQueryDTO dto) {

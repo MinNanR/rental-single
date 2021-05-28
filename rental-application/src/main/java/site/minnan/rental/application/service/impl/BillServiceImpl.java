@@ -20,6 +20,7 @@ import site.minnan.rental.application.provider.RoomProviderService;
 import site.minnan.rental.application.provider.TenantProviderService;
 import site.minnan.rental.application.provider.UtilityProviderService;
 import site.minnan.rental.application.service.BillService;
+import site.minnan.rental.application.service.HouseService;
 import site.minnan.rental.domain.aggregate.Bill;
 import site.minnan.rental.domain.aggregate.Room;
 import site.minnan.rental.domain.aggregate.Tenant;
@@ -30,11 +31,9 @@ import site.minnan.rental.domain.entity.BillTenantRelevance;
 import site.minnan.rental.domain.entity.JwtUser;
 import site.minnan.rental.domain.mapper.BillMapper;
 import site.minnan.rental.domain.mapper.BillTenantRelevanceMapper;
-import site.minnan.rental.domain.vo.bill.BillData;
-import site.minnan.rental.domain.vo.bill.BillInfoVO;
-import site.minnan.rental.domain.vo.bill.BillVO;
+import site.minnan.rental.domain.vo.bill.*;
 import site.minnan.rental.domain.vo.ListQueryVO;
-import site.minnan.rental.domain.vo.bill.ChartVO;
+import site.minnan.rental.domain.vo.house.HouseDropDown;
 import site.minnan.rental.domain.vo.utility.UtilityPrice;
 import site.minnan.rental.infrastructure.enumerate.BillStatus;
 import site.minnan.rental.infrastructure.enumerate.BillType;
@@ -79,6 +78,9 @@ public class BillServiceImpl implements BillService {
 
     @Autowired
     private BillTenantRelevanceMapper billTenantRelevanceMapper;
+
+    @Autowired
+    private HouseService houseService;
 
     /**
      * 结算账单
@@ -237,8 +239,8 @@ public class BillServiceImpl implements BillService {
     public BigDecimal getMonthTotal() {
         QueryWrapper<Bill> queryWrapper = new QueryWrapper<>();
         queryWrapper.select("id", "water_charge", "electricity_charge", "rent", "type", "deposit", "access_card_charge")
-                .eq("month(pay_time)", DateUtil.month(DateTime.now()) + 1)
-                .eq("status", BillStatus.PAID);
+                .eq("month(create_time)", DateUtil.month(DateTime.now()) + 1)
+                .in("status", BillStatus.PAID, BillStatus.UNPAID);
         List<Bill> bills = billMapper.selectList(queryWrapper);
         Optional<BigDecimal> total = Optional.empty();
         if (CollectionUtil.isNotEmpty(bills)) {
@@ -248,6 +250,28 @@ public class BillServiceImpl implements BillService {
             total = Optional.of(totalValue);
         }
         return total.orElse(BigDecimal.ZERO);
+    }
+
+    /**
+     * 获取本月总额（分房屋）
+     *
+     * @return
+     */
+    @Override
+    public List<MonthTotalVO> getMonthTotalVO() {
+        QueryWrapper<Bill> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("id", "house_id", "house_name", "water_charge", "electricity_charge", "rent", "type",
+                "deposit", "access_card_charge")
+                .eq("month(create_time)", DateUtil.month(DateTime.now()) + 1)
+                .in("status", BillStatus.PAID, BillStatus.UNPAID);
+        List<HouseDropDown> houseList = houseService.getHouseDropDown();
+        List<Bill> bills = billMapper.selectList(queryWrapper);
+        Map<Integer, BigDecimal> groupByHouseId = bills.stream().collect(Collectors.groupingBy(Bill::getHouseId,
+                Collectors.collectingAndThen(Collectors.toList(),
+                        e -> e.stream().map(Bill::totalCharge).reduce(BigDecimal.ZERO, BigDecimal::add))));
+        return houseList.stream()
+                .map(e -> new MonthTotalVO(e, groupByHouseId.getOrDefault(e.getId(), BigDecimal.ZERO)))
+                .collect(Collectors.toList());
     }
 
     /**

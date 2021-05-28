@@ -1,5 +1,6 @@
 package site.minnan.rental.application.service;
 
+import site.minnan.rental.domain.vo.bill.MonthTotalVO;
 import site.minnan.rental.domain.vo.bill.BillData;
 import site.minnan.rental.domain.vo.bill.BillInfoVO;
 import site.minnan.rental.domain.vo.bill.BillVO;
@@ -77,6 +78,12 @@ public interface BillService {
      * @return
      */
     BigDecimal getMonthTotal();
+
+    /**
+     * 获取本月总额（分房屋）
+     * @return
+     */
+    List<MonthTotalVO> getMonthTotalVO();
 
     /**
      * 获取账单详情
