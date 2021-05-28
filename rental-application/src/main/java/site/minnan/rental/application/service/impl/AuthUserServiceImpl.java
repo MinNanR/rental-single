@@ -111,6 +111,7 @@ public class AuthUserServiceImpl implements AuthUserService {
      * @param dto 更新用户信息参数
      */
     @Override
+    @CacheEvict(value = "authUser", key = "#result")
     public String updateUser(UpdateUserDTO dto) {
         AuthUser authUser = userMapper.selectById(dto.getId());
         if (authUser == null) {
@@ -127,6 +128,7 @@ public class AuthUserServiceImpl implements AuthUserService {
                 .set("update_user_name", principal.getRealName())
                 .set("update_time", new Timestamp(System.currentTimeMillis()));
         userMapper.update(null, wrapper);
+        redisUtil.delete("authUser::" + authUser.getUsername());
         return authUser.getUsername();
     }
 

@@ -25,14 +25,14 @@ public class BillData {
 
     private Integer price;
 
-    @JsonFormat(pattern = "M月dd日")
+    @JsonFormat(pattern = "M月dd日",timezone = "GMT+08:00")
     private Timestamp utilityStartDate;
 
     private String utilityStartId;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+08:00")
     private Date startDate;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+08:00")
     private Date endDate;
 }

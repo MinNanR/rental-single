@@ -7,6 +7,9 @@ import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 import site.minnan.rental.domain.aggregate.Room;
 import site.minnan.rental.domain.vo.RoomDropDown;
+import site.minnan.rental.domain.vo.bill.BillInfoVO;
+import site.minnan.rental.domain.vo.bill.BillVO;
+import site.minnan.rental.domain.vo.room.RentingInfoVO;
 import site.minnan.rental.domain.vo.utility.UtilityInitVO;
 
 import java.util.List;
@@ -27,18 +30,27 @@ public interface RoomMapper extends BaseMapper<Room> {
     @Select("select id id, room_number roomNumber from rental_room where house_id = #{houseId}")
     List<RoomDropDown> getRoomDropDown(@Param("houseId") Integer houseId);
 
-    Integer updateRoomStatusBatch(@Param("roomList")List<Room> roomList);
+    Integer updateRoomStatusBatch(@Param("roomList") List<Room> roomList);
 
     @Select("select distinct floor from rental_room where house_id = #{houseId}")
     List<Integer> getFloorDropDown(@Param("houseId") Integer houseId);
 
-    List<UtilityInitVO> getRoomList(@Param("houseId")Integer houseId, @Param("floor")Integer floor,
+    List<UtilityInitVO> getRoomList(@Param("houseId") Integer houseId, @Param("floor") Integer floor,
                                     @Param("status") String status);
 
     /**
      * 获取当前押金
+     *
      * @param roomId
      * @return
      */
-    Integer getCurrentDeposit(@Param("roomId")Integer roomId);
+    Integer getCurrentDeposit(@Param("roomId") Integer roomId);
+
+    /**
+     * 获取当前入住信息
+     *
+     * @param roomId
+     * @return
+     */
+    RentingInfoVO getRentingInfo(@Param("roomId") Integer roomId);
 }

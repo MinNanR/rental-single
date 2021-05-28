@@ -3,6 +3,7 @@ package site.minnan.rental.application.provider.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,8 +72,10 @@ public class BillProviderServiceImpl implements BillProviderService {
         Integer currentUtilityId = utilityProviderService.getCurrentUtility(dto.getRoomId());
         UtilityPrice price = billService.getUtilityPrice();
         //入住账单
-        DateTime oneMonthLater = checkDate.offsetNew(DateField.MONTH, 1);
-        DateTime twoMonthLater = oneMonthLater.offsetNew(DateField.MONTH, 1);
+//        DateTime oneMonthLater = checkDate.offsetNew(DateField.MONTH, 1);
+//        DateTime twoMonthLater = oneMonthLater.offsetNew(DateField.MONTH, 1);
+        int dayOfCheckDateMonth = DateUtil.endOfMonth(checkDate).dayOfMonth();//入住当月的月天数
+        DateTime checkInBillEndDate = checkDate.offsetNew(DateField.DAY_OF_MONTH, dayOfCheckDateMonth - 1);//入住账单偏移
         Bill checkInBill = Bill.builder()
                 .year(checkDate.year())
                 .month(checkDate.month() + 1)
@@ -87,7 +90,7 @@ public class BillProviderServiceImpl implements BillProviderService {
                 .remark(dto.getRemark())
                 .completedDate(new Timestamp(checkDate.getTime()))
                 .startDate(checkDate)
-                .endDate(oneMonthLater)
+                .endDate(checkInBillEndDate)
                 .payTime(new Timestamp(checkDate.getTime()))
                 .paymentMethod(PaymentMethod.valueOf(dto.getPayMethod()))
                 .utilityStartId(currentUtilityId)
@@ -95,16 +98,22 @@ public class BillProviderServiceImpl implements BillProviderService {
                 .type(BillType.CHECK_IN)
                 .build();
         checkInBill.setCreateUser(dto.getUserId(), dto.getUserName(), new Timestamp(checkDate.getTime()));
+
+        DateTime monthlyBillStartDate = checkInBillEndDate.offsetNew(DateField.DAY_OF_MONTH, 1);
+        DateTime monthlyBillEndDate = monthlyBillStartDate.offsetNew(DateField.MONTH, 1);
+        if (monthlyBillStartDate.dayOfMonth() == monthlyBillEndDate.dayOfMonth()) {
+            monthlyBillEndDate.offset(DateField.DAY_OF_MONTH, -1);
+        }
         Bill monthlyBill = Bill.builder()
-                .year(checkDate.year())
-                .month(oneMonthLater.month() + 1)
+                .year(monthlyBillStartDate.year())
+                .month(monthlyBillStartDate.monthBaseOne())
                 .houseId(roomInfo.getInt("houseId"))
                 .houseName(roomInfo.getStr("houseName"))
                 .roomId(dto.getRoomId())
                 .roomNumber(roomInfo.getStr("roomNumber"))
                 .rent(roomInfo.getInt("price"))
-                .startDate(oneMonthLater)
-                .endDate(twoMonthLater)
+                .startDate(monthlyBillStartDate)
+                .endDate(monthlyBillEndDate)
                 .utilityStartId(currentUtilityId)
                 .status(BillStatus.INIT)
                 .type(BillType.MONTHLY)
@@ -171,9 +180,9 @@ public class BillProviderServiceImpl implements BillProviderService {
                 bill.unconfirmed();
 
                 Room roomInfo = roomMap.get(bill.getRoomId());
-                if(Objects.equals(roomInfo.getStatus(), RoomStatus.ON_RENT)){
+                if (Objects.equals(roomInfo.getStatus(), RoomStatus.ON_RENT)) {
                     DateTime startDate = DateTime.of(bill.getEndDate());
-                    DateTime endDate =startDate.offsetNew(DateField.MONTH, 1);
+                    DateTime endDate = startDate.offsetNew(DateField.MONTH, 1).offset(DateField.DAY_OF_MONTH, -1);
                     DateTime completeDate = DateTime.of(bill.getCompletedDate()).offsetNew(DateField.MONTH, 1);
                     Bill newBill = Bill.builder()
                             .year(startDate.year())
@@ -201,5 +210,12 @@ public class BillProviderServiceImpl implements BillProviderService {
                     .collect(Collectors.toList());
             billTenantRelevanceMapper.insertBatch(relevanceList);
         }
+    }
+
+    public static void main(String[] args) {
+        DateTime dateTime1 = new DateTime("2021-01-30", "yyyy-MM-dd");
+        int day = DateUtil.endOfMonth(dateTime1).dayOfMonth();
+        DateTime dateTime2 = new DateTime(dateTime1).offset(DateField.DAY_OF_MONTH, day);
+        System.out.println(dateTime2.toString("yyyy-MM-dd"));
     }
 }

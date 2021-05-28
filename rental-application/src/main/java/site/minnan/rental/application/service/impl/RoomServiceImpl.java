@@ -1,6 +1,7 @@
 package site.minnan.rental.application.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -15,10 +16,8 @@ import site.minnan.rental.domain.aggregate.Utility;
 import site.minnan.rental.domain.entity.JwtUser;
 import site.minnan.rental.domain.mapper.RoomMapper;
 import site.minnan.rental.domain.vo.*;
-import site.minnan.rental.domain.vo.room.FloorDropDown;
-import site.minnan.rental.domain.vo.room.FloorVO;
-import site.minnan.rental.domain.vo.room.RoomInfoVO;
-import site.minnan.rental.domain.vo.room.RoomVO;
+import site.minnan.rental.domain.vo.bill.BillInfoVO;
+import site.minnan.rental.domain.vo.room.*;
 import site.minnan.rental.domain.vo.utility.UtilityInitVO;
 import site.minnan.rental.infrastructure.enumerate.RoomStatus;
 import site.minnan.rental.infrastructure.exception.EntityNotExistException;
@@ -107,8 +106,10 @@ public class RoomServiceImpl implements RoomService {
         }
         RoomInfoVO vo = RoomInfoVO.assemble(room);
         if (RoomStatus.ON_RENT.equals(room.getStatus())) {
-            Integer currentDeposit = roomMapper.getCurrentDeposit(room.getId());
-            vo.setDeposit(currentDeposit);
+//            Integer currentDeposit = roomMapper.getCurrentDeposit(room.getId());
+            RentingInfoVO rentingInfo = roomMapper.getRentingInfo(room.getId());
+            vo.setDeposit(rentingInfo.getDeposit());
+            vo.setCheckInDate(DateUtil.format(rentingInfo.getCheckInDate(), "yyyy年M月d日"));
         }
         return vo;
     }

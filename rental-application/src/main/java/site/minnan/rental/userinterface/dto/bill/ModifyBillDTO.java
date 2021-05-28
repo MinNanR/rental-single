@@ -27,4 +27,10 @@ public class ModifyBillDTO {
     private String startDate;
 
     private String endDate;
+
+    private Integer deposit;
+
+    private Integer accessCardQuantity;
+
+    private String remark;
 }

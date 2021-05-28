@@ -523,7 +523,7 @@ public class TenantServiceImpl implements TenantService {
         List<AddTenantUserDTO> addUserDTO = new ArrayList<>();
         for (Tenant tenant : tenantList) {
             //添加房客用户
-            if(tenant.getPhone() != null){
+            if(StrUtil.isNotBlank(tenant.getPhone())){
                 AddTenantUserDTO tenantUserDTO = AddTenantUserDTO.builder()
                         .phone(tenant.getPhone())
                         .realName(tenant.getName())

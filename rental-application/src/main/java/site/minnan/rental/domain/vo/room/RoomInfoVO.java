@@ -42,6 +42,8 @@ public class RoomInfoVO {
 
     private BigDecimal electricity;
 
+    private String checkInDate;
+
     public static RoomInfoVO assemble(Room room){
         return RoomInfoVO.builder()
                 .id(room.getId())

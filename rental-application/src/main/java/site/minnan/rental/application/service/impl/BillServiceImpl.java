@@ -555,8 +555,12 @@ public class BillServiceImpl implements BillService {
         billMapper.updateById(bill);
 
         JSONObject room = roomProviderService.getRoomInfo(bill.getRoomId());
-        DateTime startDate = DateTime.of(bill.getEndDate());
+
+        DateTime startDate = new DateTime(bill.getEndDate()).offset(DateField.DAY_OF_MONTH, 1);
         DateTime endDate = startDate.offsetNew(DateField.MONTH, 1);
+        if (startDate.dayOfMonth() == endDate.dayOfMonth()) {
+            endDate.offset(DateField.DAY_OF_MONTH, -1);
+        }
         Bill newBill = Bill.builder()
                 .houseId(bill.getHouseId())
                 .houseName(bill.getHouseName())
@@ -592,26 +596,59 @@ public class BillServiceImpl implements BillService {
         } else if (BillStatus.PAID.equals(bill.getStatus())) {
             throw new UnmodifiableException("账单不可修改");
         }
-        BigDecimal waterStart = Optional.ofNullable(dto.getWaterStart()).orElse(bill.getWaterStart());
-        BigDecimal electricityStart = Optional.ofNullable(dto.getElectricityStart()).orElse(bill.getElectricityStart());
-        Utility start = utilityProviderService.getOrUpdateUtility(bill.getUtilityStartId(), waterStart,
-                electricityStart);
-        BigDecimal waterEnd = Optional.ofNullable(dto.getWaterEnd()).orElse(bill.getWaterEnd());
-        BigDecimal electricityEnd = Optional.ofNullable(dto.getElectricityEnd()).orElse(bill.getElectricityEnd());
-        Utility end = utilityProviderService.getOrUpdateUtility(bill.getUtilityEndId(), waterEnd, electricityEnd);
-        UtilityPrice price = getUtilityPrice();
-        bill.setUtilityStart(start);
-        bill.setUtilityEnd(end);
-        bill.settleWater(price.getWaterPrice());
-        bill.settleElectricity(price.getElectricityPrice());
-        Optional.ofNullable(dto.getStartDate()).ifPresent(s -> bill.setStartDate(DateUtil.parseDate(s)));
-        Optional.ofNullable(dto.getEndDate()).ifPresent(s -> bill.setEndDate(DateUtil.parseDate(s)));
+        if (BillType.MONTHLY.equals(bill.getType())) {
+            BigDecimal waterStart = Optional.ofNullable(dto.getWaterStart()).orElse(bill.getWaterStart());
+            BigDecimal electricityStart =
+                    Optional.ofNullable(dto.getElectricityStart()).orElse(bill.getElectricityStart());
+            Utility start = utilityProviderService.getOrUpdateUtility(bill.getUtilityStartId(), waterStart,
+                    electricityStart);
+            BigDecimal waterEnd = Optional.ofNullable(dto.getWaterEnd()).orElse(bill.getWaterEnd());
+            BigDecimal electricityEnd = Optional.ofNullable(dto.getElectricityEnd()).orElse(bill.getElectricityEnd());
+            Utility end = utilityProviderService.getOrUpdateUtility(bill.getUtilityEndId(), waterEnd, electricityEnd);
+            UtilityPrice price = getUtilityPrice();
+            bill.setUtilityStart(start);
+            bill.setUtilityEnd(end);
+            bill.settleWater(price.getWaterPrice());
+            bill.settleElectricity(price.getElectricityPrice());
+            Optional.ofNullable(dto.getStartDate()).ifPresent(s -> bill.setStartDate(DateUtil.parseDate(s)));
+            Optional.ofNullable(dto.getEndDate()).ifPresent(s -> bill.setEndDate(DateUtil.parseDate(s)));
+        } else if (BillType.CHECK_IN.equals(bill.getType())) {
+            BigDecimal waterStart = Optional.ofNullable(dto.getWaterStart()).orElseGet(bill::getWaterStart);
+            BigDecimal electricityStart =
+                    Optional.ofNullable(dto.getElectricityStart()).orElseGet(bill::getElectricityStart);
+            utilityProviderService.getOrUpdateUtility(bill.getUtilityStartId(), waterStart,
+                    electricityStart);
+            Optional.ofNullable(dto.getStartDate()).ifPresent(s -> bill.setStartDate(DateUtil.parseDate(s)));
+            Optional.ofNullable(dto.getEndDate()).ifPresent(s -> bill.setEndDate(DateUtil.parseDate(s)));
+            Optional.ofNullable(dto.getDeposit()).ifPresent(bill::setDeposit);
+            Optional.ofNullable(dto.getAccessCardQuantity()).ifPresent(e -> {
+                UtilityPrice price = getUtilityPrice();
+                Integer accessCardPrice = price.getAccessCardPrice(bill.getHouseName());
+                bill.setAccessCardQuantity(e, accessCardPrice);
+            });
+            Optional.ofNullable(dto.getRemark()).ifPresent(bill::setRemark);
+        }
         try {
             receiptUtils.generateReceipt(bill);
         } catch (IOException e) {
             log.error("生成账单IO异常，id={}", bill.getId());
         }
         billMapper.updateById(bill);
+    }
+
+    /**
+     * 修改入住账单数据
+     *
+     * @param dto
+     */
+    @Override
+    public void modifyCheckInBill(ModifyBillDTO dto) {
+        BillDetails bill = billMapper.getBillDetails(dto.getBillId());
+        if (bill == null) {
+            throw new EntityNotExistException("账单不存在");
+        } else if (BillStatus.PAID.equals(bill.getStatus())) {
+            throw new UnmodifiableException("账单不可修改");
+        }
     }
 
     /**

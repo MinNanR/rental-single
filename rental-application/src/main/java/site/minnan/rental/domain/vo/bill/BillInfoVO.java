@@ -85,6 +85,8 @@ public class BillInfoVO {
 
     private String endDate;
 
+    private String remark;
+
     public static BillInfoVO assemble(Bill bill) {
         return BillInfoVO.builder()
                 .id(bill.getId())
@@ -151,6 +153,7 @@ public class BillInfoVO {
                 .electricityEnd(bill.getElectricityEnd())
                 .startDate(DateUtil.format(bill.getStartDate(), "yyyy-MM-dd"))
                 .endDate(DateUtil.format(bill.getEndDate(), "yyyy-MM-dd"))
+                .remark(bill.getRemark())
                 .build();
     }
 }

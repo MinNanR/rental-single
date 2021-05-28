@@ -63,7 +63,7 @@ public class BillVO {
                 .typeCode(bill.getType().getValue())
                 .month(DateTime.of(bill.getStartDate()).month() + 1 + "月")
 //                .time(StrUtil.format("{}年{}月", bill.getYear(), bill.getMonth()))
-                .time(DateUtil.format(bill.getStartDate(), "yyyy年M月"))
+                .time(DateUtil.format(bill.getEndDate(), "yyyy年M月"))
                 .updateTime(DateUtil.format(bill.getUpdateTime(), "yyyy-MM-dd"))
                 .build();
     }

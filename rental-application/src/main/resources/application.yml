@@ -23,7 +23,7 @@ server:
 jwt:
   route:
     authentication:
-      path: /rental/auth/login/password
+      path: /rental/auth/login/password, /album/*
   header: Authorization
   expiration: 604800
   scret: min107

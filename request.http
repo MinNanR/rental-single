@@ -230,7 +230,7 @@ Content-Type: application/json
 Authorization: {{admin_token}}
 
 {
-  "id": 2
+  "id": 130
 }
 
 ###
@@ -605,7 +605,7 @@ Content-Type: application/json
 Authorization: {{admin_token}}
 
 {
-  "roomId":36
+  "roomId":130
 }
 
 ###
@@ -641,7 +641,7 @@ Authorization: {{admin_token}}
 }
 
 ###
-POST http://localhost:8101/album/listEvent
+POST http://minnan.site:8101/album/listEvent
 Content-Type: application/json
 Authorization: {{admin_token}}
 

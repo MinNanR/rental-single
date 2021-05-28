@@ -156,6 +156,13 @@ public interface BillService {
     void modifyBill(ModifyBillDTO dto);
 
     /**
+     * 修改入住账单数据
+     *
+     * @param dto
+     */
+    void modifyCheckInBill(ModifyBillDTO dto);
+
+    /**
      * 获取图表数据
      *
      * @return

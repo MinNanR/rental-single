@@ -12,6 +12,7 @@ import site.minnan.rental.infrastructure.enumerate.PaymentMethod;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * 账单
@@ -91,6 +92,7 @@ public class Bill {
     /**
      * 押金
      */
+    @Setter
     private Integer deposit;
 
     /**
@@ -112,6 +114,7 @@ public class Bill {
     /**
      * 备注
      */
+    @Setter
     private String remark;
 
     /**
@@ -272,5 +275,10 @@ public class Bill {
 
     public void paid() {
         this.status = BillStatus.PAID;
+    }
+
+    public void setAccessCardQuantity(int accessCardQuantity, int price){
+        this.accessCardQuantity = accessCardQuantity;
+        this.accessCardCharge = accessCardQuantity * price;
     }
 }
