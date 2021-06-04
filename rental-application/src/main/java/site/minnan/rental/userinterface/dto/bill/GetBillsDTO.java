@@ -18,4 +18,8 @@ public class GetBillsDTO extends ListQueryDTO {
     private String roomNumber;
 
     private String status;
+
+    private Integer year;
+
+    private Integer month;
 }

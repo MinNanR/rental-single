@@ -11,7 +11,10 @@ import site.minnan.rental.userinterface.dto.*;
 import site.minnan.rental.userinterface.dto.bill.*;
 import site.minnan.rental.userinterface.dto.utility.SetUtilityPriceDTO;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -81,6 +84,7 @@ public interface BillService {
 
     /**
      * 获取本月总额（分房屋）
+     *
      * @return
      */
     List<MonthTotalVO> getMonthTotalVO();
@@ -175,4 +179,11 @@ public interface BillService {
      * @return
      */
     List<ChartVO> getChartData();
+
+    /**
+     * 导出指定月份的账单记录
+     *
+     * @param dto
+     */
+    void exportMonthBill(GetBillsDTO dto, HttpServletResponse response) throws UnsupportedEncodingException;
 }

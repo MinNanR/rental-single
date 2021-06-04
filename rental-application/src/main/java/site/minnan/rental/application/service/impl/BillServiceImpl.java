@@ -3,8 +3,14 @@ package site.minnan.rental.application.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateRange;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Console;
+import cn.hutool.core.text.csv.CsvUtil;
+import cn.hutool.core.text.csv.CsvWriter;
+import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -48,9 +54,15 @@ import site.minnan.rental.userinterface.dto.bill.*;
 import site.minnan.rental.userinterface.dto.utility.AddUtilityDTO;
 import site.minnan.rental.userinterface.dto.utility.SetUtilityPriceDTO;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -223,7 +235,8 @@ public class BillServiceImpl implements BillService {
 //                .values();
 //        ArrayList<BillVO> vo = ListUtil.toList(collection);
         QueryWrapper<Bill> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("status", dto.getStatus());
+        queryWrapper.eq("status", dto.getStatus())
+                .orderByDesc("update_time");
         Page<Bill> queryPage = new Page<>(dto.getPageIndex(), dto.getPageSize());
         IPage<Bill> page = billMapper.selectPage(queryPage, queryWrapper);
         List<BillVO> list = page.getRecords().stream().map(BillVO::assemble).collect(Collectors.toList());
@@ -333,6 +346,8 @@ public class BillServiceImpl implements BillService {
         Optional.ofNullable(dto.getHouseId()).ifPresent(s -> queryWrapper.eq("house_id", s));
         Optional.ofNullable(dto.getRoomNumber()).ifPresent(s -> queryWrapper.eq("room_number", s));
         Optional.ofNullable(dto.getStatus()).ifPresent(s -> queryWrapper.eq("status", s));
+        Optional.ofNullable(dto.getYear()).ifPresent(s -> queryWrapper.eq("year(end_date)", s));
+        Optional.ofNullable(dto.getMonth()).ifPresent(s -> queryWrapper.eq("month(end_date)", s));
         queryWrapper.ne("status", BillStatus.INIT);
         Page<Bill> queryPage = new Page<>(dto.getPageIndex(), dto.getPageSize());
         IPage<Bill> page = billMapper.selectPage(queryPage, queryWrapper);
@@ -586,6 +601,8 @@ public class BillServiceImpl implements BillService {
             endDate.offset(DateField.DAY_OF_MONTH, -1);
         }
         Bill newBill = Bill.builder()
+                .year(endDate.year())
+                .month(endDate.monthBaseOne())
                 .houseId(bill.getHouseId())
                 .houseName(bill.getHouseName())
                 .roomId(bill.getRoomId())
@@ -687,5 +704,79 @@ public class BillServiceImpl implements BillService {
         List<Bill> billList = billMapper.getChartData(tenant.getId());
         List<ChartVO> vo = billList.stream().map(ChartVO::assemble).collect(Collectors.toList());
         return vo;
+    }
+
+    /**
+     * 导出指定月份的账单记录
+     *
+     * @param dto
+     * @param response
+     */
+    @Override
+    public void exportMonthBill(GetBillsDTO dto, HttpServletResponse response) throws UnsupportedEncodingException {
+        CsvWriter writer = null;
+        Integer houseId = dto.getHouseId();
+        DateTime time = DateUtil.parse(StrUtil.format("{}-{}", dto.getYear(), dto.getMonth()), "yyyy-M");
+        List<BillDetails> list = billMapper.getBillListByMonth(houseId, DateUtil.beginOfMonth(time),
+                DateUtil.endOfMonth(time));
+        if (CollectionUtil.isEmpty(list)) {
+            return;
+        }
+        BillDetails sample = list.get(0);
+        response.setHeader("Content-Disposition", "attachment;filename="
+                + URLEncoder.encode(StrUtil.format("{}{}年{}月账单记录.csv", sample.getHouseName(), dto.getYear(),
+                dto.getMonth()), CharsetUtil.UTF_8));
+        response.setContentType("multipart/form-data;charset=utf-8");
+        response.setHeader("Access-control-Expose-Headers", "Content-Disposition");
+        response.setCharacterEncoding(CharsetUtil.UTF_8);
+        try {
+            writer = CsvUtil.getWriter(response.getWriter());
+            writer.write(new String[]{"房屋", "房号", "账单开始日期", "账单结束日期", "账单总额", "上月行度(水)", "本月行度(水)",
+                    "用水量", "水费", "上月行度(电)", "本月行度(电)", "用电量", "电费", "押金", "门禁卡数量", "门禁卡收费"});
+            ListUtil.sortByProperty(list, "roomNumber");
+            for (BillDetails item : list) {
+                String[] content;
+                switch (item.getType()) {
+                    case MONTHLY:
+                        content = new String[]{item.getHouseName(),
+                                item.getRoomNumber(),
+                                DateUtil.format(item.getStartDate(), "M月d日"),
+                                DateUtil.format(item.getEndDate(), "M月d日"),
+                                NumberUtil.decimalFormat(",###", item.totalCharge()),
+                                String.valueOf(item.getWaterStart()),
+                                String.valueOf(item.getWaterEnd()),
+                                String.valueOf(item.getWaterUsage()),
+                                String.valueOf(item.getWaterCharge()),
+                                String.valueOf(item.getElectricityStart()),
+                                String.valueOf(item.getElectricityEnd()),
+                                String.valueOf(item.getElectricityUsage()),
+                                String.valueOf(item.getElectricityCharge()),
+                                "/", "/", "/"};
+                        break;
+                    case CHECK_IN: {
+                        content = new String[]{item.getHouseName(),
+                                item.getRoomNumber(),
+                                DateUtil.format(item.getStartDate(), "M月d日"),
+                                DateUtil.format(item.getEndDate(), "M月d日"),
+                                NumberUtil.decimalFormat(",###", item.totalCharge()),
+                                String.valueOf(item.getWaterStart()), "/", "/", "/",
+                                String.valueOf(item.getElectricityStart()), "/", "/", "/",
+                                String.valueOf(item.getDeposit()),
+                                String.valueOf(item.getAccessCardQuantity()),
+                                String.valueOf(item.getAccessCardCharge())};
+                        break;
+                    }
+                    default:
+                        content = new String[16];
+                }
+                writer.write(content);
+            }
+        } catch (IOException e) {
+            log.error("导出账单记录异常", e);
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
+        }
     }
 }

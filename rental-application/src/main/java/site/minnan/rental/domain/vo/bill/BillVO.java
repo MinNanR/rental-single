@@ -61,7 +61,7 @@ public class BillVO {
                 .statusCode(bill.getStatus().getValue())
                 .type(bill.getType().getType())
                 .typeCode(bill.getType().getValue())
-                .month(DateTime.of(bill.getStartDate()).month() + 1 + "月")
+                .month(DateTime.of(bill.getStartDate()).monthBaseOne() + "月")
 //                .time(StrUtil.format("{}年{}月", bill.getYear(), bill.getMonth()))
                 .time(DateUtil.format(bill.getEndDate(), "yyyy年M月"))
                 .updateTime(DateUtil.format(bill.getUpdateTime(), "yyyy-MM-dd"))
@@ -77,7 +77,7 @@ public class BillVO {
                 .type(bill.getType().getType())
                 .typeCode(bill.getType().getValue())
                 .time(DateUtil.format(bill.getStartDate(), "yyyy年M月"))
-                .month(DateTime.of(bill.getStartDate()).month() + 1  + "月")
+                .month(DateTime.of(bill.getStartDate()).monthBaseOne() + "月")
                 .updateTime(DateUtil.format(bill.getUpdateTime(), "yyyy-MM-dd"))
                 .build();
     }

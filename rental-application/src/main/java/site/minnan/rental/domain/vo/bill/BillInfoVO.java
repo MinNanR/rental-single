@@ -119,7 +119,7 @@ public class BillInfoVO {
     }
 
     public static BillInfoVO assemble(BillDetails bill) {
-        DateTime endDate = DateTime.of(bill.getStartDate());
+        DateTime endDate = DateTime.of(bill.getEndDate());
         return BillInfoVO.builder()
                 .id(bill.getId())
                 .houseId(bill.getHouseId())
@@ -127,7 +127,7 @@ public class BillInfoVO {
                 .roomId(bill.getRoomId())
                 .roomNumber(bill.getRoomNumber())
                 .year(endDate.year())
-                .month(endDate.month() + 1)
+                .month(endDate.monthBaseOne())
                 .waterUsage(bill.getWaterUsage())
                 .waterCharge(bill.getWaterCharge())
                 .electricityUsage(bill.getElectricityUsage())

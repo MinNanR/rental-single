@@ -13,6 +13,7 @@ import site.minnan.rental.infrastructure.enumerate.BillStatus;
 import site.minnan.rental.infrastructure.enumerate.BillType;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -111,4 +112,14 @@ public interface BillMapper extends BaseMapper<Bill> {
             "left join rental_bill_tenant_relevance t2 on t1.id = t2.bill_id " +
             "where tenant_id = #{tenantId} and status != 'INIT' and type != 'CHECK_IN' limit 6")
     List<Bill> getChartData(@Param("tenantId") Integer tenantId);
+
+    /**
+     * 获取指定房屋的指定时间段内的所有已结算的账单
+     * @param houseId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<BillDetails> getBillListByMonth(@Param("houseId")Integer houseId, @Param("startDate")Date startDate, @Param(
+            "endDate")Date endDate);
 }
