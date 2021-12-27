@@ -30,7 +30,7 @@ jwt:
 
 logging:
   file:
-    name: ./logs/rental/rental.log
+    name: ./logs/rental.log
 
 mybatis-plus:
   mapper-locations: /site/minnan/rental/domain/mapper/*.xml

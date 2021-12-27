@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -19,10 +20,8 @@ import site.minnan.rental.userinterface.dto.album.AddEventDTO;
 import site.minnan.rental.userinterface.dto.album.UploadImageDTO;
 import site.minnan.rental.userinterface.response.ResponseEntity;
 
-import javax.xml.ws.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -108,5 +107,13 @@ public class SpecialController {
             log.error("异常", e);
             return ResponseEntity.fail("操作失败");
         }
+
+    }
+
+    @PostMapping("callBack")
+    @ResponseBody
+    public ResponseEntity<?> callBack(@RequestBody Map<String, Object> map) {
+        log.info(map.toString());
+        return ResponseEntity.success();
     }
 }

@@ -605,7 +605,7 @@ Content-Type: application/json
 Authorization: {{admin_token}}
 
 {
-  "roomId":130
+  "roomId": 130
 }
 
 ###
@@ -654,3 +654,14 @@ Authorization: {{admin_token}}
   "description": "汕头旅行",
   "time": "2019-02-13"
 }
+
+###
+POST http://localhost:8101/album/callBack
+Content-Type: application/json
+
+{
+  "url": "asdfjasldkf"
+}
+
+###
+GET http://localhost:8101/album/getSsr

@@ -13,5 +13,6 @@
             #{item.createUserId}, #{item.createUserName}, #{item.createTime}, #{item.updateUserId},
             #{item.updateUserName}, #{item.updateTime}, #{item.passwordStamp})
         </foreach>
+        on duplicate key update update_user_id = values(update_user_id), update_user_name = values(update_user_name), update_time = now()
     </insert>
 </mapper>

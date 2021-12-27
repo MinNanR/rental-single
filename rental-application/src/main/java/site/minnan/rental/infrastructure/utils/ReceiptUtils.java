@@ -271,7 +271,7 @@ public class ReceiptUtils {
         //水费
         context.setVariable("waterStart", bill.getWaterStart().intValue());
         context.setVariable("waterEnd", bill.getWaterEnd().intValue());
-        context.setVariable("waterUsage", bill.getWaterUsage());
+        context.setVariable("waterUsage", bill.getWaterUsage().intValue());
         context.setVariable("waterPrice", price.getWaterPrice().intValue());
         String[] waterCharge = splitNumber(bill.getWaterCharge().intValue());
         context.setVariable("waterCharge", waterCharge);
