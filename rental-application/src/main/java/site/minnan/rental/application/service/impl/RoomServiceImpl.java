@@ -9,6 +9,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import site.minnan.rental.application.provider.BillProviderService;
 import site.minnan.rental.application.provider.UtilityProviderService;
 import site.minnan.rental.application.service.RoomService;
 import site.minnan.rental.domain.aggregate.Room;
@@ -37,6 +39,9 @@ public class RoomServiceImpl implements RoomService {
 
     @Autowired
     private UtilityProviderService utilityProviderService;
+
+    @Autowired
+    private BillProviderService billProviderService;
 
 
     /**
@@ -120,6 +125,7 @@ public class RoomServiceImpl implements RoomService {
      * @param dto
      */
     @Override
+    @Transactional
     public void updateRoom(UpdateRoomDTO dto) {
         Integer check = roomMapper.checkRoomExists(dto.getId());
         if (check == null) {
@@ -129,12 +135,14 @@ public class RoomServiceImpl implements RoomService {
         wrapper.eq("id", dto.getId());
         Optional.ofNullable(dto.getRoomNumber()).ifPresent(s -> wrapper.set("room_number", s));
         Optional.ofNullable(dto.getFloor()).ifPresent(s -> wrapper.set("floor", s));
-        Optional.ofNullable(dto.getPrice()).ifPresent(s -> wrapper.set("price", s));
+        Optional<Integer> priceOpt = Optional.ofNullable(dto.getPrice());
+        priceOpt.ifPresent(s -> wrapper.set("price", s));
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         wrapper.set("update_user_id", jwtUser.getId())
                 .set("update_user_name", jwtUser.getRealName())
                 .set("update_time", new Timestamp(System.currentTimeMillis()));
         roomMapper.update(null, wrapper);
+        priceOpt.ifPresent(e -> billProviderService.updateBillRent(dto.getId(), e));
     }
 
     /**

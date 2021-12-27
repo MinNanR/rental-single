@@ -29,4 +29,12 @@ public interface BillProviderService {
      * @param roomIds
      */
     void completeBill(Collection<Integer> roomIds);
+
+    /**
+     * 修改房价后更新当前账单价格
+     *
+     * @param roomId 房间id
+     * @param rent   新房租
+     */
+    void updateBillRent(Integer roomId, Integer rent);
 }

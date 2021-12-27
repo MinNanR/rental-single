@@ -4,7 +4,10 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.json.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -212,10 +215,30 @@ public class BillProviderServiceImpl implements BillProviderService {
         }
     }
 
-    public static void main(String[] args) {
-        DateTime dateTime1 = new DateTime("2021-01-30", "yyyy-MM-dd");
-        int day = DateUtil.endOfMonth(dateTime1).dayOfMonth();
-        DateTime dateTime2 = new DateTime(dateTime1).offset(DateField.DAY_OF_MONTH, day);
-        System.out.println(dateTime2.toString("yyyy-MM-dd"));
+    /**
+     * 修改房价后更新当前账单价格
+     *
+     * @param roomId 房间id
+     * @param rent   新房租
+     */
+    @Override
+    public void updateBillRent(Integer roomId, Integer rent) {
+        Assert.notNull(roomId);
+        Assert.notNull(rent);
+        QueryWrapper<Bill> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("room_id", roomId)
+                .eq("status", BillStatus.INIT)
+                .orderByDesc("update_time")
+                .last(" limit 1");
+        Bill targetBill = billMapper.selectOne(queryWrapper);
+        if(targetBill != null && Objects.equals(rent, targetBill.getRent())){
+            return;
+        }
+        UpdateWrapper<Bill> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("rent", rent)
+                .eq("id", targetBill.getId());
+        billMapper.update(null, updateWrapper);
     }
+
+
 }
