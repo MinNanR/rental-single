@@ -231,7 +231,7 @@ public class BillProviderServiceImpl implements BillProviderService {
                 .orderByDesc("update_time")
                 .last(" limit 1");
         Bill targetBill = billMapper.selectOne(queryWrapper);
-        if(targetBill != null && Objects.equals(rent, targetBill.getRent())){
+        if(targetBill == null || Objects.equals(rent, targetBill.getRent())){
             return;
         }
         UpdateWrapper<Bill> updateWrapper = new UpdateWrapper<>();

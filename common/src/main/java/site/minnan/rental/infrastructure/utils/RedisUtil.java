@@ -215,4 +215,7 @@ public class RedisUtil {
         return redisTemplate.getExpire(key, timeUnit);
     }
 
+    public boolean setnx(String key, Object value){
+        return redisTemplate.opsForValue().setIfAbsent(key, value);
+    }
 }

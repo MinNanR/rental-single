@@ -13,6 +13,7 @@ import site.minnan.rental.domain.vo.bill.*;
 import site.minnan.rental.domain.vo.utility.UtilityPrice;
 import site.minnan.rental.infrastructure.enumerate.BillStatus;
 import site.minnan.rental.infrastructure.enumerate.UtilityStatus;
+import site.minnan.rental.infrastructure.utils.RedisUtil;
 import site.minnan.rental.userinterface.dto.*;
 import site.minnan.rental.userinterface.dto.bill.*;
 import site.minnan.rental.userinterface.dto.utility.SetUtilityPriceDTO;
@@ -25,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -39,6 +41,8 @@ public class BillController {
     @Autowired
     private BillService billService;
 
+    @Autowired
+    private RedisUtil redisUtil;
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'LANDLORD')")
     @PostMapping("settleBill")
@@ -210,7 +214,12 @@ public class BillController {
     @PostMapping("fillBill")
     @ResponseBody
     public ResponseEntity<?> fillBill(@RequestBody @Valid FillBillDTO dto) {
+        if (!redisUtil.setnx("fillBill:" + dto.getBillId(), 1)) {
+            return ResponseEntity.message("请勿频繁操作");
+        }
+        redisUtil.setExpire("fillBill:" + dto.getBillId(), 1L, TimeUnit.MINUTES);
         billService.fillMonthlyBill(dto);
+        redisUtil.delete("fillBill:" + dto.getBillId());
         return ResponseEntity.success(dto);
     }
 
